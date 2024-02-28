@@ -65,10 +65,12 @@ class TestParseTime(unittest.TestCase):
         )
 
     def test_tomorrow(self):
+        new_datetime = datetime.datetime.now() + datetime.timedelta(days=1)
+        new_date = new_datetime.date()
         self.assertEqual(
             parse_time("tomorrow at half three"),
             datetime.datetime.combine(
-                datetime.datetime.now() + datetime.timedelta(days=1),
+                new_date,
                 datetime.time(2, 30),
             ),
         )
