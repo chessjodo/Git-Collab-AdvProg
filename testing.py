@@ -48,6 +48,31 @@ class TestParseTime(unittest.TestCase):
             time_20_minutes,
         )
 
+    def test_next(self):
+        day_of_the_week = datetime.datetime.now().weekday()
+        difference = (1 - day_of_the_week) % 7
+        self.assertEqual(
+            parse_time("next Tuesday"),
+            datetime.datetime.now() + datetime.timedelta(days=difference),
+        )
+
+    def test_last(self):
+        day_of_the_week = datetime.datetime.now().weekday()
+        difference = (4 - day_of_the_week) % 7 - 7
+        self.assertEqual(
+            parse_time("last Friday"),
+            datetime.datetime.now() + datetime.timedelta(days=difference),
+        )
+
+    def test_tomorrow(self):
+        self.assertEqual(
+            parse_time("tomorrow at half three"),
+            datetime.datetime.combine(
+                datetime.datetime.now() + datetime.timedelta(days=1),
+                datetime.time(2, 30),
+            ),
+        )
+
     def tearDown(self):
         pass
 
