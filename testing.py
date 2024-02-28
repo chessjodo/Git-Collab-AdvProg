@@ -9,7 +9,44 @@ class TestParseTime(unittest.TestCase):
         pass
 
     def test_words_for_hours(self):
-        self.assertEqual(parse_time("Five O'Clock"), datetime.time(4, 0))
+        self.assertEqual(parse_time("four o'clock"), datetime.time(4, 0))
+
+    def test_past_to(self):
+        self.assertEqual(parse_time("ten past two"), datetime.time(2, 10))
+        self.assertEqual(parse_time("five to ten"), datetime.time(9, 55))
+
+    def test_fractions(self):
+        self.assertEqual(
+            parse_time("a quarter to three"), datetime.time(2, 45)
+        )
+        self.assertEqual(parse_time("half twelve"), datetime.time(11, 30))
+        self.assertEqual(parse_time("half past one"), datetime.time(1, 30))
+
+    def test_ago(self):
+        long_date = datetime.datetime.now() - datetime.timedelta(minutes=10)
+        time_10_ago = long_date.time()
+        self.assertEqual(parse_time("ten minutes ago"), time_10_ago)
+
+        long_date = datetime.datetime.now() - datetime.timedelta(
+            hours=1, minutes=30
+        )
+        time_1_5_hours_ago = long_date.time()
+        self.assertEqual(
+            parse_time("one and a half hours ago"), time_1_5_hours_ago
+        )
+
+        self.assertEqual(
+            parse_time("three weeks ago"),
+            datetime.datetime.now() - datetime.timedelta(days=21),
+        )
+
+    def test_in(self):
+        long_date = datetime.datetime.now() + datetime.timedelta(minutes=20)
+        time_20_minutes = long_date.time()
+        self.assertEqual(
+            parse_time("in twenty minutes' time"),
+            time_20_minutes,
+        )
 
     def tearDown(self):
         pass
