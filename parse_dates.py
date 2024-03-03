@@ -89,7 +89,7 @@ def check_past(description):
 def convert_fractions(description):
     common_fractions = ["quarter", "half"]
     values = ["fifteen", "thirty"]
-    re_fractions = r"\b(a\s)?({})\s((to\s)?|(past\s)?)".format(
+    re_fractions = r"\b(a\s)?({})\s((to\s)|(past\s)?)".format(
         "|".join(common_fractions)
     )
     adjusted_description = description
