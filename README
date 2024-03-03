@@ -3,7 +3,7 @@ Here we can add the documentation of the program...
 Proposition division of tasks:
 
 
-Person1:
+Person1: (Jonas)
 
 Introductory function - Parsing dates & times
 Points in time
@@ -54,5 +54,3 @@ The Sunday following the full Moon which falls on or after the vernal equinox.
 Of course, to do this you'll need to find a Python library that gives phases of the moon.
 
 Dates such as the start of the month of Ramadan or the start of the Hebrew new year are even more challenging.
-
-
