@@ -54,3 +54,9 @@ The Sunday following the full Moon which falls on or after the vernal equinox.
 Of course, to do this you'll need to find a Python library that gives phases of the moon.
 
 Dates such as the start of the month of Ramadan or the start of the Hebrew new year are even more challenging.
+
+
+Sources:
+
+Walrus operator, to call function and save return value within an if-statement
+https://chat.openai.com/share/7dd6aba1-fa43-46cf-88e5-b298a96d0de0
