@@ -79,6 +79,9 @@ class TestParseTime(unittest.TestCase):
             ),
         )
 
+    def test_easter(self):
+        self.assertEqual(parse_time("next Easter"), datetime.date(2024, 3, 31))
+
     def tearDown(self):
         pass
 
