@@ -1,6 +1,8 @@
 import datetime
 import unittest
 
+import ephem
+
 from parse_dates import parse_time
 
 
@@ -80,7 +82,14 @@ class TestParseTime(unittest.TestCase):
         )
 
     def test_easter(self):
-        self.assertEqual(parse_time("next Easter"), datetime.date(2024, 3, 31))
+        equinox = ephem.localtime(ephem.next_equinox(ephem.now()))
+        full_moon = ephem.localtime(
+            ephem.next_full_moon(equinox - datetime.timedelta(days=1))
+        )
+        weekday_fullmoon = full_moon.weekday()
+        diff_to_sunday = 6 - weekday_fullmoon
+        easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
+        self.assertEqual(parse_time("next Easter"), easter_date.date())
 
     def tearDown(self):
         pass

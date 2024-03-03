@@ -134,12 +134,9 @@ def check_easter(description):
     re_easter = r"(\bnext\s)?easter"
     if matched := re.search(re_easter, description):
         equinox = ephem.localtime(ephem.next_equinox(ephem.now()))
-
-        print("EQUINOX: ", equinox)
         full_moon = ephem.localtime(
             ephem.next_full_moon(equinox - datetime.timedelta(days=1))
         )
-        print("FULLMOON: ", full_moon)
         weekday_fullmoon = full_moon.weekday()
         diff_to_sunday = 6 - weekday_fullmoon
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
