@@ -64,8 +64,7 @@ def check_to(description):
     )  # RE to check whether an text is of the structure "<minute> to <hour>"
 
     # recognizing to expression
-    if re.match(re_to, description):
-        match_object = re.search(re_to, description)
+    if match_object := re.search(re_to, description):
         sub_string = description[match_object.start() : match_object.end()]
         split_string = sub_string.split(" to ")
         minutes = 59 - minute_numbers.index(split_string[0])
@@ -74,17 +73,19 @@ def check_to(description):
     return False
 
 
+# function that converts occurences of fractions
 def convert_fractions(description):
     common_fractions = ["quarter", "half"]
     values = ["fifteen", "thirty"]
     re_fractions = r"\b(a )?({})".format("|".join(common_fractions))
     adjusted_description = description
-    if matched := re.match(re_fractions, description):
-        adjusted_description = (
-            description[: matched.start()]
-            + values[common_fractions.index(matched.group(2))]
-            + description[matched.end() :]
-        )
+    if matches := re.finditer(re_fractions, description):
+        for matched in matches:
+            adjusted_description = (
+                adjusted_description[: matched.start()]
+                + values[common_fractions.index(matched.group(2))]
+                + adjusted_description[matched.end() :]
+            )
         print("NEW DESCRIPTION", adjusted_description)
     return adjusted_description
 
@@ -93,10 +94,13 @@ def convert_fractions(description):
 def parse_time(description):
     description = description.lower()
     dimension_case = "t"
+
     # convert fractions to minutes
     description = convert_fractions(description)
+
     if check_to_result := check_to(description):
-        return check_to_result
+        return check_to_result  # datetime.time object
+
     # purely for testing
     if re.search("o'clock", description):
         return f"o'clock found"
