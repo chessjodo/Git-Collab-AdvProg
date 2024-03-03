@@ -112,32 +112,50 @@ def convert_fractions(description):
 
 # function that checks for "<hour> o'clock" and returns a datetime.time object
 def check_oclock(description):
-    re_oclock = r"\b({})\s+o'?clock".format("|".join(HOURS))
+    re_oclock = r"\s+o'?clock"
     if matched := re.search(re_oclock, description):
-        return datetime.time(HOURS.index(matched.group(1)) + 1, 0)
+        return description[: matched.start()] + description[matched.end() :]
+    return description
+
+
+def check_basic_time(description):
+    print("DESCRIPTION: ", description)
+    re_basic = r"\b({})\s*({})?".format("|".join(HOURS), "|".join(MINUTES))
+    if matched := re.match(re_basic, description):
+        print("MATCHED")
+        hour = HOURS.index(matched.group(1)) + 1
+        minutes = (
+            MINUTES.index(matched.group(2)) + 1 if matched.group(2) else 0
+        )
+        return datetime.time(hour, minutes)
 
 
 # main checker function
 def parse_time(description):
+    output_date = None
+    output_time = None
     description = description.lower()
     dimension_case = "t"
 
     # convert fractions to minutes
     description = convert_fractions(description)
+    # remove o'clock
+    description = check_oclock(description)
 
     if check_to_result := check_to(description):
-        return check_to_result  # datetime.time object
-    if check_past_result := check_past(description):
-        return check_past_result  # datetime.time object
-    if check_oclock_result := check_oclock(description):
-        return check_oclock_result  # datetime.time object
-    # purely for testing
-    if re.search("o'clock", description):
-        return f"o'clock found"
-    if dimension_case == "t":
-        return datetime.time(1, 0)
-    elif dimension_case == "d":
-        return datetime.datetime(2024, 2, 28)
+        output_time = check_to_result  # datetime.time object
+    elif check_past_result := check_past(description):
+        output_time = check_past_result  # datetime.time object
+    elif check_basic_result := check_basic_time(description):
+        output_time = check_basic_result  # datetime.time object
+    if output_date and output_time:
+        return datetime.datetime.combine(output_date, output_time)
+    elif output_date:
+        return output_date
+    elif output_time:
+        return output_time
+    else:
+        return datetime.time(1, 0)  # default
 
 
 if __name__ == "__main__":
