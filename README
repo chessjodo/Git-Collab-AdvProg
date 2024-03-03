@@ -65,3 +65,6 @@ https://chat.openai.com/share/7dd6aba1-fa43-46cf-88e5-b298a96d0de0
 
 Regular expression manual
 https://docs.python.org/3/howto/regex.html
+
+PyEphem Library to find full moon and quinoxes
+https://rhodesmill.org/pyephem/quick.html
