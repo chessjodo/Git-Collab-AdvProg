@@ -11,9 +11,11 @@ class TestParseTime(unittest.TestCase):
     def test_words_for_hours(self):
         self.assertEqual(parse_time("four o'clock"), datetime.time(4, 0))
 
-    def test_past_to(self):
-        self.assertEqual(parse_time("ten past two"), datetime.time(2, 10))
+    def test_to(self):
         self.assertEqual(parse_time("five to ten"), datetime.time(9, 55))
+
+    def test_past(self):
+        self.assertEqual(parse_time("ten past two"), datetime.time(2, 10))
 
     def test_fractions(self):
         self.assertEqual(
