@@ -74,11 +74,27 @@ def check_to(description):
     return False
 
 
+def convert_fractions(description):
+    common_fractions = ["quarter", "half"]
+    values = ["fifteen", "thirty"]
+    re_fractions = r"\b(a )?({})".format("|".join(common_fractions))
+    adjusted_description = description
+    if matched := re.match(re_fractions, description):
+        adjusted_description = (
+            description[: matched.start()]
+            + values[common_fractions.index(matched.group(2))]
+            + description[matched.end() :]
+        )
+        print("NEW DESCRIPTION", adjusted_description)
+    return adjusted_description
+
+
 # main checker function
 def parse_time(description):
     description = description.lower()
     dimension_case = "t"
-
+    # convert fractions to minutes
+    description = convert_fractions(description)
     if check_to_result := check_to(description):
         return check_to_result
     # purely for testing
