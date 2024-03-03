@@ -1,6 +1,8 @@
 import datetime
 import re
 
+import ephem
+
 DIGITS = [
     "one",
     "two",
@@ -119,15 +121,29 @@ def check_oclock(description):
 
 
 def check_basic_time(description):
-    print("DESCRIPTION: ", description)
     re_basic = r"\b({})\s*({})?".format("|".join(HOURS), "|".join(MINUTES))
     if matched := re.match(re_basic, description):
-        print("MATCHED")
         hour = HOURS.index(matched.group(1)) + 1
         minutes = (
             MINUTES.index(matched.group(2)) + 1 if matched.group(2) else 0
         )
         return datetime.time(hour, minutes)
+
+
+def check_easter(description):
+    re_easter = r"(\bnext\s)?easter"
+    if matched := re.search(re_easter, description):
+        equinox = ephem.localtime(ephem.next_equinox(ephem.now()))
+
+        print("EQUINOX: ", equinox)
+        full_moon = ephem.localtime(
+            ephem.next_full_moon(equinox - datetime.timedelta(days=1))
+        )
+        print("FULLMOON: ", full_moon)
+        weekday_fullmoon = full_moon.weekday()
+        diff_to_sunday = 6 - weekday_fullmoon
+        easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
+        return easter_date.date()
 
 
 # main checker function
@@ -141,7 +157,8 @@ def parse_time(description):
     description = convert_fractions(description)
     # remove o'clock
     description = check_oclock(description)
-
+    if check_easter_result := check_easter(description):
+        output_date = check_easter_result
     if check_to_result := check_to(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
