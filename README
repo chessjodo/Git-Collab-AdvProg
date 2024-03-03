@@ -3,8 +3,12 @@ Here we can add the documentation of the program...
 Proposition division of tasks:
 
 
+<<<<<<< HEAD
 Person1:
 Jonas
+=======
+Person1: (Jonas)
+>>>>>>> 6261254f54b1f562fcd1e0fce0f4548bd10c276f
 
 Introductory function - Parsing dates & times
 Points in time
@@ -59,3 +63,7 @@ Of course, to do this you'll need to find a Python library that gives phases of 
 Dates such as the start of the month of Ramadan or the start of the Hebrew new year are even more challenging.
 
 
+Sources:
+
+Walrus operator, to call function and save return value within an if-statement
+https://chat.openai.com/share/7dd6aba1-fa43-46cf-88e5-b298a96d0de0
