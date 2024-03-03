@@ -54,11 +54,7 @@ def check_minutes(text):
     return False
 
 
-# main checker function
-def parse_time(description):
-    description = description.lower()
-    dimension_case = "t"
-    check_minutes(description)
+def check_to(description):
     extended_digits = [""] + DIGITS
     minute_numbers = HOURS[:-5] + [
         i + j for i in TENS for j in extended_digits
@@ -75,7 +71,16 @@ def parse_time(description):
         minutes = 59 - minute_numbers.index(split_string[0])
         hours = HOURS.index(split_string[1])
         return datetime.time(hours, minutes)
+    return False
 
+
+# main checker function
+def parse_time(description):
+    description = description.lower()
+    dimension_case = "t"
+
+    if check_to_result := check_to(description):
+        return check_to_result
     # purely for testing
     if re.search("o'clock", description):
         return f"o'clock found"
