@@ -1,1 +1,56 @@
 Here we can add the documentation of the program...
+
+Proposition division of tasks:
+
+
+Person1:
+Points in time
+
+Your function should at least be able to parse the following:
+
+four o'clock
+ten past two
+five to ten
+a quarter to three
+
+Person2:
+
+three weeks ago
+ten minutes ago
+in twenty minutes' time
+Relative time points
+
+You might also like to parse expressions such as:
+
+next Tuesday
+last Friday
+tomorrow at half three
+Wednesday week at quarter past four
+
+
+Person3:
+
+
+Durations and Repeating events
+
+A duration has a start time and an end time. You might represent that as a tuple containing two datetimes. A repeating event could be represented as a list of such durations, in case of a finite number of repetitions, or a tuple consisting of a datetime and a timedelta, in the case of an indefinitely repeating event.
+
+next Friday at noon for half an hour
+every Thursday at three
+every Monday in September at four thirty.
+the first Monday of every month at quarter to six
+
+
+Person4:
+
+Irregular dates such as Easter
+
+If you want to be really ambitious, you could also parse expressions such as written by the Venerable Bede in the year 725. He determined the date of Easter in the Christian calendar to be
+
+The Sunday following the full Moon which falls on or after the vernal equinox.
+
+Of course, to do this you'll need to find a Python library that gives phases of the moon.
+
+Dates such as the start of the month of Ramadan or the start of the Hebrew new year are even more challenging.
+
+
