@@ -62,3 +62,6 @@ Sources:
 
 Walrus operator, to call function and save return value within an if-statement
 https://chat.openai.com/share/7dd6aba1-fa43-46cf-88e5-b298a96d0de0
+
+Regular expression manual
+https://docs.python.org/3/howto/regex.html
