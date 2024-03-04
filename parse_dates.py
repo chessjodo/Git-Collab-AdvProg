@@ -163,7 +163,6 @@ def check_basic_time(description):
         )
         return datetime.time(hour, minutes)
 
-
 def check_easter(description):
     re_easter = r"(\bnext\s)?easter"
     if matched := re.search(re_easter, description):
@@ -175,6 +174,31 @@ def check_easter(description):
         diff_to_sunday = 6 - weekday_fullmoon
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
         return easter_date.date()
+
+# function that returns datetime.datetime from a description of a
+# fixed datetime. Maybe useful?
+def parse_fixed_time(description):
+
+# function that returns datetime.datetime of a description of a
+# single datetime point (it can be fixed or relative)
+def parse_point_time(description):
+
+# function that checks for <from <datetime1> to <datetime2>> and returns
+# a tuple of (datetime.datetime,datetime.datetime)
+def check_from_to(des):
+    re_from = r"\bfrom\s+"
+    re_to = r"\bto\s+"
+    if not(match_from:=re.search(re_from,des)):
+        return False
+    match_to=re.search(re_to,des)
+
+    des_left=des[match_from.end():match_to.start()]
+    dt_left=parse_point_time(des_left)
+
+    des_right=des[match_to.end():]
+    dt_right=parse_point_time(des_right)
+
+    return (dt_left,dt_right)
 
 
 # main checker function
