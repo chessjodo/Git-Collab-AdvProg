@@ -38,13 +38,14 @@ HOURS = DIGITS + [
     "twentyfour",
 ]
 
-DAYS = ["monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday"
+DAYS = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
 ]
 TENS = ["twenty", "thirty", "fourty", "fifty"]
 
@@ -99,19 +100,45 @@ def check_past(description):
         return datetime.time(hours, minutes)
     return False
 
+
+# takes a string of type
+# "<number> <time unit> <number> <time unit> ..."
+# and returns datetime.timedelta
+# e.g: >>>parse_interval("an hour twentysix minutes")
+#         datetime.timedelta(seconds=5160)
+def parse_interval(string):
+    s = string.split()
+    interval = datetime.timedelta()
+    l = len(s)
+    pars = {}
+    for i in range(0, l, 2):
+        if s[i] in ["a", "an"]:
+            n = 1
+            s[i + 1] += "s"
+        elif s[i] in MINUTES:
+            n = MINUTES.index(s[i]) + 1
+        else:
+            raise ValueError("Invalid string format")
+        if s[i + 1] in ["minutes", "hours", "days", "weeks"]:
+            pars[s[i + 1]] = n
+        else:
+            raise ValueError("Invalid string format")
+    return datetime.timedelta(**pars)
+
+
 def check_ago(description, current_time):
     re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
 
     if match_object := re.search(re_ago, description):
-        sub_string = description[match_object.start(): match_object.end()]
+        sub_string = description[match_object.start() : match_object.end()]
         split_string = sub_string.split(" ago")
         minutes = DIGITS.index(split_string[0]) + 1
         hours = HOURS.index(split_string[1].strip()) + 1
         return datetime.datetime.combine(
-            current_date,
-            datetime.time(f"{hours:02d}", f"{minutes:02d}")
+            current_date, datetime.time(f"{hours:02d}", f"{minutes:02d}")
         )
     return False
+
 
 def check_tomorrow(description):
     re_tomorrow = rf"\b(?:{'|'.join(DAYS)})\s+tomorrow\b"
@@ -163,6 +190,7 @@ def check_basic_time(description):
         )
         return datetime.time(hour, minutes)
 
+
 def check_easter(description):
     re_easter = r"(\bnext\s)?easter"
     if matched := re.search(re_easter, description):
@@ -191,27 +219,35 @@ def check_hebrew_new_year(description):
 # function that returns datetime.datetime from a description of a
 # fixed datetime. Maybe useful?
 def parse_fixed_time(description):
+    True
+
 
 # function that returns datetime.datetime of a description of a
 # single datetime point (it can be fixed or relative)
 def parse_point_time(description):
+    True
+
 
 # function that checks for <from <datetime1> to <datetime2>> and returns
 # a tuple of (datetime.datetime,datetime.datetime)
 def check_from_to(des):
     re_from = r"\bfrom\s+"
     re_to = r"\bto\s+"
-    if not(match_from:=re.search(re_from,des)):
+    if not (match_from := re.search(re_from, des)):
         return False
-    match_to=re.search(re_to,des)
+    match_to = re.search(re_to, des)
 
-    des_left=des[match_from.end():match_to.start()]
-    dt_left=parse_point_time(des_left)
+    des_left = des[match_from.end() : match_to.start()]
+    dt_left = parse_point_time(des_left)
 
-    des_right=des[match_to.end():]
-    dt_right=parse_point_time(des_right)
+    des_right = des[match_to.end() :]
+    dt_right = parse_point_time(des_right)
 
-    return (dt_left,dt_right)
+    return (dt_left, dt_right)
+
+
+def check_for(des):
+    re_for = 2
 
 
 # main checker function
@@ -248,9 +284,17 @@ def parse_time(description):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
 
    current_date = datetime.datetime.now().date()
    current_time = datetime.datetime.now().time()
    current_weekday = datetime.datetime.now().weekday()
 
    print(parse_time("tomorrow"))
+=======
+    current_date = datetime.datetime.now().date()
+    current_time = datetime.datetime.now().time()
+    current_weekday = datetime.datetime.now().weekday()
+
+    print(parse_time("tomorrow"))
+>>>>>>> 4b6ae84 (added parse_interval)
