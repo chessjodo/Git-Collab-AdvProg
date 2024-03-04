@@ -3,8 +3,10 @@ import re
 
 import ephem
 
-current_date = datetime.now().date()
-current_time = datetime.now().time()
+current_date = datetime.datetime.now().date()
+current_time = datetime.datetime.now().time()
+current_weekday = datetime.datetime.now().weekday()
+
 
 DIGITS = [
     "one",
@@ -39,7 +41,7 @@ HOURS = DIGITS + [
 DAYS = ["monday",
         "tuesday",
         "wednesday",
-        "thurstday",
+        "thursday",
         "friday",
         "saturday",
         "sunday"
@@ -107,7 +109,7 @@ def check_tomorrow(description):
         split_string = sub_string.split(" tomorrow ")
         minutes = MINUTES.index(split_string[0])
         hours = HOURS.index(split_string[1]) 
-        day = DAYS.index(split_string[0]) + 1
+        day = DAYS.index(split_string[current_weekday]) + 1
         return datetime.time(day, hours, minutes)
     return False
     
