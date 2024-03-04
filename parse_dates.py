@@ -99,18 +99,25 @@ def check_past(description):
         return datetime.time(hours, minutes)
     return False
 
+def check_ago(description, current_time):
+    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
+    
+    if match_object := re.search(re_ago, description):
+        sub_string = description[match_object.start(): match_object.end()]
+        split_string = sub_string.split(" ago")
+        minutes = DIGITS.index(split_string[0]) + 1
+        hours = HOURS.index(split_string[1].strip()) + 1
+        return datetime.datetime.combine(
+            current_date, 
+            datetime.time(f"{hours:02d}", f"{minutes:02d}")
+        )
+    return False
 
 def check_tomorrow(description):
-    re_tomorrow = "\b(?:{})\s+tomorrow\s+\b(?:{})".format(
-        "|".join(DAYS),"|".join(MINUTES), "|".join(HOURS)
-    )
+    re_tomorrow = rf"\b(?:{'|'.join(DAYS)})\s+tomorrow\b"
+    
     if match_object := re.search(re_tomorrow, description):
-        sub_string = description[match_object.start() : match_object.end()]
-        split_string = sub_string.split(" tomorrow ")
-        minutes = MINUTES.index(split_string[0])
-        hours = HOURS.index(split_string[1]) 
-        day = DAYS.index(split_string[current_weekday]) + 1
-        return datetime.time(day, hours, minutes)
+        return current_date + datetime.timedelta(days=1)
     return False
     
 
@@ -183,6 +190,10 @@ def parse_time(description):
     description = check_oclock(description)
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
+    if check_ago_result := check_ago(description, current_time):
+        output_time = check_ago_result  # datetime.datetime object
+    elif check_tomorrow_result := check_tomorrow(description):
+        output_date = current_date + datetime.timedelta(days=1)
     if check_to_result := check_to(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
@@ -194,10 +205,15 @@ def parse_time(description):
     elif output_date:
         return output_date
     elif output_time:
-        return output_time
+        return output_time.date()  # Return only the date part
     else:
         return datetime.time(1, 0)  # default
 
 
 if __name__ == "__main__":
-    print(parse_time("four o'clock"))
+    
+   current_date = datetime.datetime.now().date()
+   current_time = datetime.datetime.now().time()
+   current_weekday = datetime.datetime.now().weekday()
+   
+   print(parse_time("tomorrow"))
