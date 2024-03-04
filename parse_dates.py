@@ -101,25 +101,25 @@ def check_past(description):
 
 def check_ago(description, current_time):
     re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
-    
+
     if match_object := re.search(re_ago, description):
         sub_string = description[match_object.start(): match_object.end()]
         split_string = sub_string.split(" ago")
         minutes = DIGITS.index(split_string[0]) + 1
         hours = HOURS.index(split_string[1].strip()) + 1
         return datetime.datetime.combine(
-            current_date, 
+            current_date,
             datetime.time(f"{hours:02d}", f"{minutes:02d}")
         )
     return False
 
 def check_tomorrow(description):
     re_tomorrow = rf"\b(?:{'|'.join(DAYS)})\s+tomorrow\b"
-    
+
     if match_object := re.search(re_tomorrow, description):
         return current_date + datetime.timedelta(days=1)
     return False
-    
+
 
 # function that converts occurences of fractions
 def convert_fractions(description):
@@ -174,6 +174,19 @@ def check_easter(description):
         diff_to_sunday = 6 - weekday_fullmoon
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
         return easter_date.date()
+
+def check_ramadan(description):
+    re_ramadan = r"\b(?:start\s+of\s+)?ramadan\b"
+    if matched := re.search(re_ramadan, description):
+        ramadan_date = datetime.date(1,1,1) #placeholder for actual value
+        return ramadan_date.date()
+
+def check_hebrew_new_year(description):
+    re_hebrew_new_year = r"\b(?:hebrew\s+new\s+year|rosh\s+hashanah)\b"
+    if matched := re.search(re_hebrew_new_year, description):
+         hebrew_new_year_date = datetime.date(1,1,1)#placeholder again
+        return hebrew_new_year_date
+
 
 # function that returns datetime.datetime from a description of a
 # fixed datetime. Maybe useful?
@@ -235,9 +248,9 @@ def parse_time(description):
 
 
 if __name__ == "__main__":
-    
+
    current_date = datetime.datetime.now().date()
    current_time = datetime.datetime.now().time()
    current_weekday = datetime.datetime.now().weekday()
-   
+
    print(parse_time("tomorrow"))
