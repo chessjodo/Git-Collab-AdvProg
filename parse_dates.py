@@ -36,6 +36,14 @@ HOURS = DIGITS + [
     "twentyfour",
 ]
 
+DAYS = ["monday",
+        "tuesday",
+        "wednesday",
+        "thurstday",
+        "friday",
+        "saturday",
+        "sunday"
+]
 TENS = ["twenty", "thirty", "fourty", "fifty"]
 
 EXTENDED_DIGITS = [
@@ -90,8 +98,19 @@ def check_past(description):
     return False
 
 
-def check_week(description):
-    re
+def check_tomorrow(description):
+    re_tomorrow = "\b(?:{})\s+tomorrow\s+\b(?:{})".format(
+        "|".join(DAYS),"|".join(MINUTES), "|".join(HOURS)
+    )
+    if match_object := re.search(re_tomorrow, description):
+        sub_string = description[match_object.start() : match_object.end()]
+        split_string = sub_string.split(" tomorrow ")
+        minutes = MINUTES.index(split_string[0])
+        hours = HOURS.index(split_string[1]) 
+        day = DAYS.index(split_string[0]) + 1
+        return datetime.time(day, hours, minutes)
+    return False
+    
 
 # function that converts occurences of fractions
 def convert_fractions(description):
