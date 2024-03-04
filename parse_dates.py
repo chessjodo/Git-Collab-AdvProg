@@ -3,6 +3,9 @@ import re
 
 import ephem
 
+current_date = datetime.now().date()
+current_time = datetime.now().time()
+
 DIGITS = [
     "one",
     "two",
@@ -86,6 +89,9 @@ def check_past(description):
         return datetime.time(hours, minutes)
     return False
 
+
+def check_week(description):
+    re
 
 # function that converts occurences of fractions
 def convert_fractions(description):
