@@ -284,17 +284,9 @@ def parse_time(description):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
 
    current_date = datetime.datetime.now().date()
    current_time = datetime.datetime.now().time()
    current_weekday = datetime.datetime.now().weekday()
 
    print(parse_time("tomorrow"))
-=======
-    current_date = datetime.datetime.now().date()
-    current_time = datetime.datetime.now().time()
-    current_weekday = datetime.datetime.now().weekday()
-
-    print(parse_time("tomorrow"))
->>>>>>> 4b6ae84 (added parse_interval)
