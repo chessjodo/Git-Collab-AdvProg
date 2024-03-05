@@ -152,7 +152,7 @@ def check_tomorrow(description):
     re_tomorrow = rf"\b(?:{'|'.join(DAYS)})\s+tomorrow\b"
 
     if match_object := re.search(re_tomorrow, description):
-        return True
+        return current_date + datetime.timedelta(days=1)
     return False
 
 
@@ -258,11 +258,13 @@ def check_ramadan(description):
 
 def check_hebrew_new_year(description):
     re_hebrew_new_year = r"\b(?:hebrew\s+new\s+year|rosh\s+hashanah)\b"
+    hebrew_new_year_date = None  # Provide a default value
+
     if matched := re.search(re_hebrew_new_year, description):
          t_j = jewish.JewishDate.from_date(current_date)
-         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1)
-    return hebrew_new_year_date.to_date()
+         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1).to_date()
 
+    return hebrew_new_year_date
 
 # function that returns datetime.datetime from a description of a
 # fixed datetime. Maybe useful?
@@ -406,7 +408,7 @@ if __name__ == "__main__":
     current_weekday = datetime.datetime.now().weekday()
 
     print(parse_time("four o'clock"))
-    print(parse_time("iten past two"))
+    print(parse_time("ten past two"))
     print(parse_time("five to ten"))
     print(parse_time("a quarter to three"))
     print(parse_time("three weeks ago"))
@@ -415,8 +417,5 @@ if __name__ == "__main__":
     print(parse_time("next Tuesday"))
     print(parse_time("last Friday"))
     print(parse_time("tomorrow at half three"))
-    print(parse_time("next Friday at noon for half an hour"))
-    print(parse_time("every Thursday at three"))
-    print(parse_time("every Monday in September at four thirty"))
-    print(parse_time("the first Monday of every month at quarter to six"))
+
 
