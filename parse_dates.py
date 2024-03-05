@@ -183,9 +183,7 @@ def check_tomorrow(description):
 
 
 def check_in_future(description, current_time):
-    re_in_future = (
-        r"\bin\s+(\w+)\s+(second|minute|hour|day|week|month|year)s?\b"
-    )
+    re_in_future = r"\bin\s+(\w+)\s+(second|minute|hour|day|week|month|year|minutes)'?\s*(?:time)?\b"
 
     if match_object := re.search(re_in_future, description):
         quantity_word, unit = match_object.group(1), match_object.group(2)
@@ -430,7 +428,7 @@ if __name__ == "__main__":
     print(parse_time("a quarter to three"))
     print(parse_time("three weeks ago"))
     print(parse_time("ten minutes ago"))
-    print(parse_time("in twenty minutes time"))
+    print(parse_time("in three minute time"))
     print(parse_time("next Wednesday"))
     print(parse_time("last Friday"))
     print(parse_time("tomorrow at half three"))
