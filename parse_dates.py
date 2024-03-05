@@ -107,6 +107,8 @@ def check_past(description):
 # e.g: >>>parse_interval("an hour twentysix minutes")
 #         datetime.timedelta(seconds=5160)
 def parse_interval(string):
+    if string == "half an hour":
+        return datetime.timedelta(minutes=30)
     s = string.split()
     interval = datetime.timedelta()
     l = len(s)
@@ -223,11 +225,11 @@ def check_hebrew_new_year(description):
 # function that returns datetime.datetime from a description of a
 # fixed datetime. Maybe useful?
 def parse_fixed_time(description):
-    True
+    pass
 
 
-# function that returns datetime.datetime of a description of a
-# single datetime point (it can be fixed or relative)
+# function that returns datetime.datetime or datetime.date from a description
+# of a single datetime point (it can be fixed or relative)
 def parse_point_time(description):
     output_date = None
     output_time = None
@@ -252,16 +254,16 @@ def parse_point_time(description):
         output_time = check_basic_result  # datetime.time object
     if output_date and output_time:
         return datetime.datetime.combine(output_date, output_time)
+    elif output_time:
+        return datetime.datetime.combine(current_date, output_time)
     elif output_date:
         return output_date
-    elif output_time:
-        return output_time
     else:
         return datetime.time(1, 0)  # default
 
 
 # function that checks for <from <datetime1> to <datetime2>> and returns
-# a tuple of (datetime.datetime,datetime.datetime)
+# False or a tuple of (datetime.datetime,datetime.datetime)
 def check_from_to(des):
     re_from = r"\bfrom\s+"
     re_to = r"\bto\s+"
@@ -286,11 +288,20 @@ def check_from_to(des):
         )
 
 
+# function that checks for <<datetime> for <interval string>>
+# (e.g: "next Friday at twelve for three hours" or
+#  "four weeks ago for two days")
+# returns False or a tuple of (datetime.datetime,datetime.datetime)
 def check_for(des):
     re_for = r"\bfor\s+"
     if not (match_for := re.search(re_for, des)):
         return False
-    des_left = des[0]
+    des_left = des[: match_for.start()]
+    time_start = parse_point_time(des_left)
+
+    des_right = des[match_for.end() :]
+    interval = parse_interval(des_right)
+    return (time_start, time_start + interval)
 
 
 # main checker function
