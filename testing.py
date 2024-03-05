@@ -91,6 +91,14 @@ class TestParseTime(unittest.TestCase):
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
         self.assertEqual(parse_time("next Easter"), easter_date.date())
 
+    def test_ramadan(self):
+        observer = ephem.Observer()
+        observer.date = datetime.datetime.now()
+        new_moon = ephem.next_new_moon(observer.date)
+        new_moon_date = ephem.localtime(new_moon).date()
+        ramadan_date = new_moon_date + datetime.timedelta(days=1)
+        self.assertEqual(parse_time("start of ramadan"), ramadan_date)
+
     def tearDown(self):
         pass
 
