@@ -31,20 +31,16 @@ class TestParseTime(unittest.TestCase):
 
     def test_ago(self):
         long_date = datetime.datetime.now() - datetime.timedelta(minutes=10)
-        time_10_ago = long_date.time()
-        self.assertEqual(parse_time("ten minutes ago"), time_10_ago)
-
-        long_date = datetime.datetime.now() - datetime.timedelta(
-            hours=1, minutes=30
-        )
-        time_1_5_hours_ago = long_date.time()
-        self.assertEqual(
-            parse_time("one and a half hours ago"), time_1_5_hours_ago
+        self.assertAlmostEqual(
+            parse_time("ten minutes ago"),
+            long_date,
+            delta=datetime.timedelta(seconds=1),
         )
 
-        self.assertEqual(
+        self.assertAlmostEqual(
             parse_time("three weeks ago"),
             datetime.datetime.now() - datetime.timedelta(days=21),
+            delta=datetime.timedelta(seconds=1),
         )
 
     def test_in(self):

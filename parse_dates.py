@@ -147,21 +147,11 @@ def word_to_number(word):
 def check_ago(
     description, current_date=current_date, current_time=current_time
 ):
-    print("AGO FUNCTION: ", description)
     re_ago = rf"\b({'|'.join(MINUTES)})\s+(second|minute|hour|day|week|month|year)s?\s+ago\b"
 
     if match_object := re.search(re_ago, description):
-        print("MATCHED AGO")
         quantity_word, unit = match_object.group(1), match_object.group(2)
         quantity = word_to_number(quantity_word)
-        print(
-            "quantity word: ",
-            quantity_word,
-            "Unit: ",
-            unit,
-            "quantity: ",
-            quantity,
-        )
         if quantity is not None:
             delta = {
                 "second": datetime.timedelta(seconds=quantity),
@@ -270,10 +260,12 @@ def check_basic_time(description):
 
 
 def check_next(description):
+    print("NEXT: ", description)
     re_next = r"\bnext\s+(\w+)\b"
     if match_object := re.search(re_next, description):
         next_day = match_object.group(1).lower()
         days_until_next = (DAYS.index(next_day) - current_weekday) % 7
+        print("Next day: ", next_day, "days_until next: ", days_until_next)
         return current_date + datetime.timedelta(days=days_until_next)
     return False
 
@@ -355,16 +347,21 @@ def parse_point_time(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
         output_time = check_past_result  # datetime.time object
+    elif check_next_result := check_next(description):
+        output_date = check_next_result
+    elif check_last_result := check_last(description):
+        output_date = check_last_result
     elif check_basic_result := check_basic_time(description):
         output_time = check_basic_result  # datetime.time object
-    if output_date and output_time:
-        return datetime.datetime.combine(output_date, output_time)
-    elif output_time:
+    if output_date is not None:
+        if output_time is not None:
+            return datetime.datetime.combine(output_date, output_time)
+        else:
+            return output_date
+    elif output_time is not None:
         return datetime.datetime.combine(current_date, output_time)
-    elif output_date:
-        return output_date
     else:
-        return datetime.time(1, 0)  # default
+        return "The entered Format is not supported"  # default
 
 
 # function that checks for <from <datetime1> to <datetime2>> and returns
