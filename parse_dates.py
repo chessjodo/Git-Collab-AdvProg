@@ -2,6 +2,7 @@ import datetime
 import re
 
 import ephem
+import jewish
 
 current_date = datetime.datetime.now().date()
 current_time = datetime.datetime.now().time()
