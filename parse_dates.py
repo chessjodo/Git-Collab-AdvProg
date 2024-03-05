@@ -127,7 +127,9 @@ def parse_interval(string):
 
 
 def check_ago(description, current_time):
-    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
+    re_ago = (
+        rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
+    )
 
     if match_object := re.search(re_ago, description):
         sub_string = description[match_object.start() : match_object.end()]
@@ -203,16 +205,18 @@ def check_easter(description):
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
         return easter_date.date()
 
+
 def check_ramadan(description):
     re_ramadan = r"\b(?:start\s+of\s+)?ramadan\b"
     if matched := re.search(re_ramadan, description):
-        ramadan_date = datetime.date(1,1,1) #placeholder for actual value
+        ramadan_date = datetime.date(1, 1, 1)  # placeholder for actual value
         return ramadan_date.date()
+
 
 def check_hebrew_new_year(description):
     re_hebrew_new_year = r"\b(?:hebrew\s+new\s+year|rosh\s+hashanah)\b"
     if matched := re.search(re_hebrew_new_year, description):
-         hebrew_new_year_date = datetime.date(1,1,1)#placeholder again
+        hebrew_new_year_date = datetime.date(1, 1, 1)  # placeholder again
         return hebrew_new_year_date
 
 
@@ -225,7 +229,35 @@ def parse_fixed_time(description):
 # function that returns datetime.datetime of a description of a
 # single datetime point (it can be fixed or relative)
 def parse_point_time(description):
-    True
+    output_date = None
+    output_time = None
+    description = description.lower()
+    dimension_case = "t"
+
+    # convert fractions to minutes
+    description = convert_fractions(description)
+    # remove o'clock
+    description = check_oclock(description)
+    if check_easter_result := check_easter(description):
+        output_date = check_easter_result
+    if check_ago_result := check_ago(description, current_time):
+        output_time = check_ago_result  # datetime.datetime object
+    elif check_tomorrow_result := check_tomorrow(description):
+        output_date = current_date + datetime.timedelta(days=1)
+    if check_to_result := check_to(description):
+        output_time = check_to_result  # datetime.time object
+    elif check_past_result := check_past(description):
+        output_time = check_past_result  # datetime.time object
+    elif check_basic_result := check_basic_time(description):
+        output_time = check_basic_result  # datetime.time object
+    if output_date and output_time:
+        return datetime.datetime.combine(output_date, output_time)
+    elif output_date:
+        return output_date
+    elif output_time:
+        return output_time
+    else:
+        return datetime.time(1, 0)  # default
 
 
 # function that checks for <from <datetime1> to <datetime2>> and returns
@@ -243,11 +275,22 @@ def check_from_to(des):
     des_right = des[match_to.end() :]
     dt_right = parse_point_time(des_right)
 
-    return (dt_left, dt_right)
+    if match_from.start() == 0:
+        return (dt_left, dt_right)
+    else:
+        des_bef = des[: match_from.start()]
+        date_bef = parse_point_time(des_bef)
+        return (
+            datetime.datetime.combine(date_bef, dt_left),
+            datetime.datetime.combine(date_bef, dt_right),
+        )
 
 
 def check_for(des):
-    re_for = 2
+    re_for = r"\bfor\s+"
+    if not (match_for := re.search(re_for, des)):
+        return False
+    des_left = des[0]
 
 
 # main checker function
@@ -284,9 +327,8 @@ def parse_time(description):
 
 
 if __name__ == "__main__":
+    current_date = datetime.datetime.now().date()
+    current_time = datetime.datetime.now().time()
+    current_weekday = datetime.datetime.now().weekday()
 
-   current_date = datetime.datetime.now().date()
-   current_time = datetime.datetime.now().time()
-   current_weekday = datetime.datetime.now().weekday()
-
-   print(parse_time("tomorrow"))
+    print(parse_time("tomorrow"))
