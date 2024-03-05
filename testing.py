@@ -2,6 +2,7 @@ import datetime
 import unittest
 
 import ephem
+import jewish
 
 from parse_dates import parse_time
 
@@ -90,6 +91,21 @@ class TestParseTime(unittest.TestCase):
         diff_to_sunday = 6 - weekday_fullmoon
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
         self.assertEqual(parse_time("next Easter"), easter_date.date())
+
+    def test_ramadan(self):
+        observer = ephem.Observer()
+        observer.date = datetime.datetime.now()
+        new_moon = ephem.next_new_moon(observer.date)
+        new_moon_date = ephem.localtime(new_moon).date()
+        ramadan_date = new_moon_date + datetime.timedelta(days=1)
+        self.assertEqual(parse_time("start of ramadan"), ramadan_date)
+
+    def test_hebrew_new_year(self):
+        t_j = jewish.JewishDate.from_date(current_date)
+        hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1)
+        self.assertEqual(
+            parse_time("hebrew new year"), hebrew_new_year_date.to_date()
+        )
 
     def tearDown(self):
         pass
