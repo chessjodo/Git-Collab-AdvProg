@@ -101,6 +101,33 @@ def check_past(description):
     return False
 
 
+# takes a string of type
+# "<number> <time unit> <number> <time unit> ..."
+# and returns datetime.timedelta
+# e.g: >>>parse_interval("an hour twentysix minutes")
+#         datetime.timedelta(seconds=5160)
+def parse_interval(string):
+    if string == "half an hour":
+        return datetime.timedelta(minutes=30)
+    s = string.split()
+    interval = datetime.timedelta()
+    l = len(s)
+    pars = {}
+    for i in range(0, l, 2):
+        if s[i] in ["a", "an"]:
+            n = 1
+            s[i + 1] += "s"
+        elif s[i] in MINUTES:
+            n = MINUTES.index(s[i]) + 1
+        else:
+            raise ValueError("Invalid string format")
+        if s[i + 1] in ["minutes", "hours", "days", "weeks"]:
+            pars[s[i + 1]] = n
+        else:
+            raise ValueError("Invalid string format")
+    return datetime.timedelta(**pars)
+
+
 def check_ago(description, current_time):
     re_ago = (
         rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
@@ -181,20 +208,57 @@ def check_easter(description):
         return easter_date.date()
 
 
+def check_ramadan(description):
+    re_ramadan = r"\b(?:start\s+of\s+)?ramadan\b"
+    if matched := re.search(re_ramadan, description):
+        ramadan_date = datetime.date(1, 1, 1)  # placeholder for actual value
+        return ramadan_date.date()
+
+
+def check_hebrew_new_year(description):
+    re_hebrew_new_year = r"\b(?:hebrew\s+new\s+year|rosh\s+hashanah)\b"
+    if matched := re.search(re_hebrew_new_year, description):
+        hebrew_new_year_date = datetime.date(1, 1, 1)  # placeholder again
+        return hebrew_new_year_date
+
+
 # function that returns datetime.datetime from a description of a
 # fixed datetime. Maybe useful?
 def parse_fixed_time(description):
     pass
 
 
-# function that returns datetime.datetime of a description of a
-# single datetime point (it can be fixed or relative)
+# function that returns datetime.datetime or datetime.date from a description
+# of a single datetime point (it can be fixed or relative)
 def parse_point_time(description):
-    pass
+    output_date = None
+    output_time = None
+    dimension_case = "t"
+
+    if check_easter_result := check_easter(description):
+        output_date = check_easter_result
+    if check_ago_result := check_ago(description, current_time):
+        output_time = check_ago_result  # datetime.datetime object
+    elif check_tomorrow_result := check_tomorrow(description):
+        output_date = current_date + datetime.timedelta(days=1)
+    if check_to_result := check_to(description):
+        output_time = check_to_result  # datetime.time object
+    elif check_past_result := check_past(description):
+        output_time = check_past_result  # datetime.time object
+    elif check_basic_result := check_basic_time(description):
+        output_time = check_basic_result  # datetime.time object
+    if output_date and output_time:
+        return datetime.datetime.combine(output_date, output_time)
+    elif output_time:
+        return datetime.datetime.combine(current_date, output_time)
+    elif output_date:
+        return output_date
+    else:
+        return datetime.time(1, 0)  # default
 
 
 # function that checks for <from <datetime1> to <datetime2>> and returns
-# a tuple of (datetime.datetime,datetime.datetime)
+# False or a tuple of (datetime.datetime,datetime.datetime)
 def check_from_to(des):
     re_from = r"\bfrom\s+"
     re_to = r"\bto\s+"
@@ -208,7 +272,31 @@ def check_from_to(des):
     des_right = des[match_to.end() :]
     dt_right = parse_point_time(des_right)
 
-    return (dt_left, dt_right)
+    if match_from.start() == 0:
+        return (dt_left, dt_right)
+    else:
+        des_bef = des[: match_from.start()]
+        date_bef = parse_point_time(des_bef)
+        return (
+            datetime.datetime.combine(date_bef, dt_left),
+            datetime.datetime.combine(date_bef, dt_right),
+        )
+
+
+# function that checks for <<datetime> for <interval string>>
+# (e.g: "next Friday at twelve for three hours" or
+#  "four weeks ago for two days")
+# returns False or a tuple of (datetime.datetime,datetime.datetime)
+def check_for(des):
+    re_for = r"\bfor\s+"
+    if not (match_for := re.search(re_for, des)):
+        return False
+    des_left = des[: match_for.start()]
+    time_start = parse_point_time(des_left)
+
+    des_right = des[match_for.end() :]
+    interval = parse_interval(des_right)
+    return (time_start, time_start + interval)
 
 
 # main checker function
@@ -222,6 +310,12 @@ def parse_time(description):
     description = convert_fractions(description)
     # remove o'clock
     description = check_oclock(description)
+    if check_from_to_result := check_from_to(description):
+        return check_from_to_result
+    if check_for_result := check_for(description):
+        return check_for_result
+
+    #   return parse_point_time(description)   instead of the block below?
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
     if check_ago_result := check_ago(description, current_time):
