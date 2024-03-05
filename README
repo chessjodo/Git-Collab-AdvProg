@@ -1,6 +1,27 @@
-Here we can add the documentation of the program...
 
 Here is a summary of our process and the helper functions that we created.
+
+Features:
+- time representation
+- parsing intervals
+- converting words to numbers
+- parsing relative time expressions
+- parsing holiday dates
+
+Dependencies:
+
+ephem==4.1.5: Used for astronomy calculations.
+jewish==0.1: Used for handling Jewish dates.
+
+
+Functions:
+
+Main function: 
+
+parse_time(description): Parsing natural language descriptions of time. It converts the input description to lowercase, applies some preprocessing, and then checks for various time-related patterns using the helper functions.
+
+
+Helper functions:
 
 check_hours(text) and check_minutes(text): Checking if a given text represents an hour or a minute measure.
 
@@ -26,17 +47,23 @@ parse_point_time(description): Parse a description of a single datetime point an
 
 check_from_to(description) and check_for(description): Checking for expressions like "from <datetime1> to <datetime2>" or "<datetime> for <interval>" 
 
-parse_time(description): It converts the input description to lowercase, applies some preprocessing, and then checks for various time-related patterns using the helper functions.
+Externam libraries installed:
 
+ephem
+jewish
 
-Jonas has taken care of creating a general background for the functions. He decided to use Rejects. 
+Contents:
 
-Tudor worked on the duration and repeating events, also using rejects.
-
-Ness also used rejects to create functions ago, next, last, past, tomorrow, and in future. They also focused on creating a delta and translating the words to integers through creating words_to_numbers.
-
-Iga worked on irregular dates, creating functions like check_ramadan and check_hebrew_new_year.
-
+File: parse_dates.py
+Contains helper function and main parse_dates function
+File: testing.py
+Contains test for helper and the main function.
+File: .gitignore
+Contains __pycache__
+File: requirements.txt
+Contains python packages used: 
+ephem==4.1.5
+jewish==0.1
 
 Sources:
 

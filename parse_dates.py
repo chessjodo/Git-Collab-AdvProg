@@ -136,7 +136,7 @@ def word_to_number(word):
     except ValueError:
         # Check if the word is a number in TENS
         try:
-            return TENS.index(word) * 10
+            return (TENS.index(word) + 2) * 10
         except ValueError:
             try:
                 return MINUTES.index(word) + 1
@@ -186,9 +186,8 @@ def check_in_future(description, current_time):
     re_in_future = r"\bin\s+(\w+)\s+(second|minute|hour|day|week|month|year|minutes)'?\s*(?:time)?\b"
 
     if match_object := re.search(re_in_future, description):
-        quantity_word, unit = match_object.groups()
+        quantity_word, unit = match_object.group(1), match_object.group(2)
         quantity = word_to_number(quantity_word)
-
         if quantity is not None:
             delta = {
                 "second": datetime.timedelta(seconds=quantity),
@@ -205,11 +204,10 @@ def check_in_future(description, current_time):
                     datetime.datetime.combine(current_date, current_time)
                     + delta
                 )
-
                 if unit.lower() in ["second", "minute", "hour"]:
-                    return future_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                    return future_datetime.date(), future_datetime.time()
                 else:
-                    return future_datetime.strftime("%Y-%m-%d")
+                    return future_datetime.date()
 
         return False
 
@@ -258,12 +256,10 @@ def check_basic_time(description):
 
 
 def check_next(description):
-    print("NEXT: ", description)
     re_next = r"\bnext\s+(\w+)\b"
     if match_object := re.search(re_next, description):
         next_day = match_object.group(1).lower()
         days_until_next = (DAYS.index(next_day) - current_weekday) % 7
-        print("Next day: ", next_day, "days_until next: ", days_until_next)
         return current_date + datetime.timedelta(days=days_until_next)
     return False
 
@@ -337,7 +333,10 @@ def parse_point_time(description):
         check_tomorrow_result = current_date + datetime.timedelta(days=1)
         output_date = check_tomorrow_result
     elif check_in_future_result := check_in_future(description, current_time):
-        output_date = check_in_future_result
+        try:
+            output_date, output_time = check_in_future_result
+        except:
+            output_date = check_in_future_result
     elif check_last_result := check_last(description):
         output_date = check_last_result
     elif check_next_result := check_next(description):
