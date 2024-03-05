@@ -1,5 +1,33 @@
 Here we can add the documentation of the program...
 
+
+check_hours(text) and check_minutes(text): Checking if a given text represents an hour or a minute measure.
+
+check_to(description) and check_past(description): Checking for expressions like "<minute> to <hour>" or "<minute> past <hour>" 
+
+parse_interval(string): Parse a string of the form "<number> <time unit> <number> <time unit> ..." 
+
+word_to_number(word): Convert a word representation of a number to a number.
+
+check_ago(description): Check for expressions like "<number> <time unit> ago" 
+
+check_tomorrow(description) and check_in_future(description, current_time): Checking for expressions like "<day> tomorrow" or "in <time>".
+
+convert_fractions(description): Convert common fractions like "quarter" and "half" to their numerical versions.
+
+check_oclock(description) and check_basic_time(description): Checking for "<hour> o'clock" or a basic time expression 
+
+check_next(description) and check_last(description): Checking for expressions like "next <day>" or "last <day>" and return the corresponding date.
+
+check_easter(description), check_ramadan(description), and check_hebrew_new_year(description): Check for specific holidays.
+
+parse_point_time(description): Parse a description of a single datetime point and return a datetime object.
+
+check_from_to(description) and check_for(description): Checking for expressions like "from <datetime1> to <datetime2>" or "<datetime> for <interval>" 
+
+parse_time(description): It converts the input description to lowercase, applies some preprocessing, and then checks for various time-related patterns using the helper functions.
+
+
 Jonas has taken care of creating a general background for the functions. He decided to use Rejects. 
 
 
