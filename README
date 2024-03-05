@@ -68,3 +68,6 @@ https://docs.python.org/3/howto/regex.html
 
 PyEphem Library to find full moon and quinoxes
 https://rhodesmill.org/pyephem/quick.html
+
+Defining the start date of Ramadan as one day after the new moon
+https://en.wikipedia.org/wiki/Ramadan#Important_dates
