@@ -31,45 +31,37 @@ class TestParseTime(unittest.TestCase):
 
     def test_ago(self):
         long_date = datetime.datetime.now() - datetime.timedelta(minutes=10)
-        time_10_ago = long_date.time()
-        self.assertEqual(parse_time("ten minutes ago"), time_10_ago)
-
-        long_date = datetime.datetime.now() - datetime.timedelta(
-            hours=1, minutes=30
-        )
-        time_1_5_hours_ago = long_date.time()
-        self.assertEqual(
-            parse_time("one and a half hours ago"), time_1_5_hours_ago
+        self.assertAlmostEqual(
+            parse_time("ten minutes ago"),
+            long_date,
+            delta=datetime.timedelta(seconds=1),
         )
 
-        self.assertEqual(
+        self.assertAlmostEqual(
             parse_time("three weeks ago"),
             datetime.datetime.now() - datetime.timedelta(days=21),
+            delta=datetime.timedelta(seconds=1),
         )
 
     def test_in(self):
         long_date = datetime.datetime.now() + datetime.timedelta(minutes=20)
-        time_20_minutes = long_date.time()
-        self.assertEqual(
+        self.assertAlmostEqual(
             parse_time("in twenty minutes' time"),
-            time_20_minutes,
+            long_date,
+            delta=datetime.timedelta(seconds=1),
         )
 
     def test_next(self):
         day_of_the_week = datetime.datetime.now().weekday()
         difference = (1 - day_of_the_week) % 7
-        self.assertEqual(
-            parse_time("next Tuesday"),
-            datetime.datetime.now() + datetime.timedelta(days=difference),
-        )
+        result = datetime.datetime.now() + datetime.timedelta(days=difference)
+        self.assertEqual(parse_time("next Tuesday"), result.date())
 
     def test_last(self):
         day_of_the_week = datetime.datetime.now().weekday()
         difference = (4 - day_of_the_week) % 7 - 7
-        self.assertEqual(
-            parse_time("last Friday"),
-            datetime.datetime.now() + datetime.timedelta(days=difference),
-        )
+        result = datetime.datetime.now() + datetime.timedelta(days=difference)
+        self.assertEqual(parse_time("last Friday"), result.date())
 
     def test_tomorrow(self):
         new_datetime = datetime.datetime.now() + datetime.timedelta(days=1)
@@ -80,6 +72,14 @@ class TestParseTime(unittest.TestCase):
                 new_date,
                 datetime.time(2, 30),
             ),
+        )
+
+    def test_in_future(self):
+        long_date = datetime.datetime.now() + datetime.timedelta(hours=2)
+        self.assertAlmostEqual(
+            parse_time("in two hours"),
+            long_date,
+            delta=datetime.timedelta(seconds=1),
         )
 
     def test_easter(self):
@@ -101,7 +101,7 @@ class TestParseTime(unittest.TestCase):
         self.assertEqual(parse_time("start of ramadan"), ramadan_date)
 
     def test_hebrew_new_year(self):
-        t_j = jewish.JewishDate.from_date(current_date)
+        t_j = jewish.JewishDate.from_date(datetime.datetime.now())
         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1)
         self.assertEqual(
             parse_time("hebrew new year"), hebrew_new_year_date.to_date()

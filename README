@@ -1,62 +1,69 @@
-Here we can add the documentation of the program...
 
-Jonas has taken care of creating a general background for the functions. He decided to use Rejects. 
+Here is a summary of our process and the helper functions that we created.
 
+Features:
+- time representation
+- parsing intervals
+- converting words to numbers
+- parsing relative time expressions
+- parsing holiday dates
 
+Dependencies:
 
-Ness also used rejects to great functions ago, next, last, past, tomorrow and in future. The also focused on creating a delta and translating the words to integers.
-Proposition division of tasks:
-
-Person1:
-Jonas
-
-Introductory function - Parsing dates & times
-Points in time
-
-Your function should at least be able to parse the following:
-
-four o'clock
-ten past two
-five to ten
-a quarter to three
-
-Person2:
-Ness
-
-three weeks ago
-ten minutes ago
-in twenty minutes' time
-next Tuesday
-last Friday
-tomorrow at half three
+ephem==4.1.5: Used for astronomy calculations.
+jewish==0.1: Used for handling Jewish dates.
 
 
-Person3:
-Tudor
+Functions:
 
-Durations and Repeating events
+Main function: 
 
-A duration has a start time and an end time. You might represent that as a tuple containing two datetimes. A repeating event could be represented as a list of such durations, in case of a finite number of repetitions, or a tuple consisting of a datetime and a timedelta, in the case of an indefinitely repeating event.
-
-next Friday at noon for half an hour
-every Thursday at three
-every Monday in September at four thirty.
-the first Monday of every month at quarter to six
+parse_time(description): Parsing natural language descriptions of time. It converts the input description to lowercase, applies some preprocessing, and then checks for various time-related patterns using the helper functions.
 
 
-Person4:
-Iga
+Helper functions:
 
-Irregular dates such as Easter
+check_hours(text) and check_minutes(text): Checking if a given text represents an hour or a minute measure.
 
-If you want to be really ambitious, you could also parse expressions such as written by the Venerable Bede in the year 725. He determined the date of Easter in the Christian calendar to be
+check_to(description) and check_past(description): Checking for expressions like "<minute> to <hour>" or "<minute> past <hour>" 
 
-The Sunday following the full Moon which falls on or after the vernal equinox.
+parse_interval(string): Parse a string of the form "<number> <time unit> <number> <time unit> ..." 
 
-Of course, to do this you'll need to find a Python library that gives phases of the moon.
+word_to_number(word): Convert a word representation of a number to a number.
 
-Dates such as the start of the month of Ramadan or the start of the Hebrew new year are even more challenging.
+check_ago(description): Check for expressions like "<number> <time unit> ago" 
 
+check_tomorrow(description) and check_in_future(description, current_time): Checking for expressions like "<day> tomorrow" or "in <time>".
+
+convert_fractions(description): Convert common fractions like "quarter" and "half" to their numerical versions.
+
+check_oclock(description) and check_basic_time(description): Checking for "<hour> o'clock" or a basic time expression 
+
+check_next(description) and check_last(description): Checking for expressions like "next <day>" or "last <day>" and return the corresponding date.
+
+check_easter(description), check_ramadan(description), and check_hebrew_new_year(description): Check for specific holidays.
+
+parse_point_time(description): Parse a description of a single datetime point and return a datetime object.
+
+check_from_to(description) and check_for(description): Checking for expressions like "from <datetime1> to <datetime2>" or "<datetime> for <interval>" 
+
+Externam libraries installed:
+
+ephem
+jewish
+
+Contents:
+
+File: parse_dates.py
+Contains helper function and main parse_dates function
+File: testing.py
+Contains test for helper and the main function.
+File: .gitignore
+Contains __pycache__
+File: requirements.txt
+Contains python packages used: 
+ephem==4.1.5
+jewish==0.1
 
 Sources:
 

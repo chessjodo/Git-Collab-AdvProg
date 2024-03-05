@@ -138,20 +138,22 @@ def word_to_number(word):
     except ValueError:
         # Check if the word is a number in TENS
         try:
-            return TENS.index(word) * 10
+            return (TENS.index(word) + 2) * 10
         except ValueError:
-            return None
+            try:
+                return MINUTES.index(word) + 1
+            except ValueError:
+                return None
 
 
 def check_ago(
     description, current_date=current_date, current_time=current_time
 ):
-    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+(second|minute|hour|day|week|month|year)s?\s+ago\b"
+    re_ago = rf"\b({'|'.join(MINUTES)})\s+(second|minute|hour|day|week|month|year)s?\s+ago\b"
 
     if match_object := re.search(re_ago, description):
-        quantity_word, unit = match_object.group(0), match_object.group(1)
+        quantity_word, unit = match_object.group(1), match_object.group(2)
         quantity = word_to_number(quantity_word)
-
         if quantity is not None:
             delta = {
                 "second": datetime.timedelta(seconds=quantity),
@@ -169,13 +171,13 @@ def check_ago(
                     - delta
                 )
 
-                return past_datetime
+                return past_datetime.date(), past_datetime.time()
 
     return False
 
 
 def check_tomorrow(description):
-    re_tomorrow = rf"\b(?:{'|'.join(DAYS)})\s+tomorrow\b"
+    re_tomorrow = rf"\b(?:{'|'.join(DAYS)})?\s?+tomorrow\b"
 
     if match_object := re.search(re_tomorrow, description):
         return current_date + datetime.timedelta(days=1)
@@ -183,12 +185,10 @@ def check_tomorrow(description):
 
 
 def check_in_future(description, current_time):
-    re_in_future = (
-        r"\bin\s+(\w+)\s+(second|minute|hour|day|week|month|year)s?\b"
-    )
+    re_in_future = r"\bin\s+(\w+)\s+(second|minute|hour|day|week|month|year)s?'?\s*(?:time)?\b"
 
     if match_object := re.search(re_in_future, description):
-        quantity_word, unit = match_object.groups()
+        quantity_word, unit = match_object.group(1), match_object.group(2)
         quantity = word_to_number(quantity_word)
 
         if quantity is not None:
@@ -207,9 +207,8 @@ def check_in_future(description, current_time):
                     datetime.datetime.combine(current_date, current_time)
                     + delta
                 )
-
                 if unit.lower() in ["second", "minute", "hour"]:
-                    return future_datetime
+                    return future_datetime.date(), future_datetime.time()
                 else:
                     return future_datetime.date()
 
@@ -251,7 +250,7 @@ def check_oclock(description):
 
 def check_basic_time(description):
     re_basic = r"\b({})\s*({})?".format("|".join(HOURS), "|".join(MINUTES))
-    if matched := re.match(re_basic, description):
+    if matched := re.search(re_basic, description):
         hour = HOURS.index(matched.group(1)) + 1
         minutes = (
             MINUTES.index(matched.group(2)) + 1 if matched.group(2) else 0
@@ -288,6 +287,7 @@ def check_easter(description):
         diff_to_sunday = 6 - weekday_fullmoon
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
         return easter_date.date()
+    return False
 
 
 def check_ramadan(description):
@@ -299,6 +299,7 @@ def check_ramadan(description):
         new_moon_date = ephem.localtime(new_moon).date()
         ramadan_date = new_moon_date + datetime.timedelta(days=1)
         return ramadan_date
+    return False
 
 
 def check_hebrew_new_year(description):
@@ -308,14 +309,8 @@ def check_hebrew_new_year(description):
     if matched := re.search(re_hebrew_new_year, description):
         t_j = jewish.JewishDate.from_date(current_date)
         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1).to_date()
-
-    return hebrew_new_year_date
-
-
-# function that returns datetime.datetime from a description of a
-# fixed datetime. Maybe useful?
-def parse_fixed_time(description):
-    pass
+        return hebrew_new_year_date
+    return False
 
 
 # function that returns datetime.datetime or datetime.date from a description
@@ -331,30 +326,37 @@ def parse_point_time(description, current_time=current_time):
         output_date = check_ramadan_result
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
-    elif check_ago_result := check_ago(
-        description, current_date, current_time
-    ):
-        output_time = check_ago_result  # datetime.datetime object
     elif check_tomorrow_result := check_tomorrow(description):
-        output_date = current_date + datetime.timedelta(
-            days=1
-        )  # Next day's date
+        check_tomorrow_result = current_date + datetime.timedelta(days=1)
+        output_date = check_tomorrow_result
     elif check_in_future_result := check_in_future(description, current_time):
-        output_date = check_in_future_result
-    if check_to_result := check_to(description):
+        try:
+            output_date, output_time = check_in_future_result
+        except:
+            output_date = check_in_future_result
+    elif check_last_result := check_last(description):
+        output_date = check_last_result
+    elif check_next_result := check_next(description):
+        output_date = check_next_result
+    if check_ago_result := check_ago(description, current_date, current_time):
+        output_date, output_time = check_ago_result  # datetime.datetime object
+    elif check_to_result := check_to(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
         output_time = check_past_result  # datetime.time object
-    elif check_basic_result := check_basic_time(description):
+    if (output_time == None) and (
+        check_basic_result := check_basic_time(description)
+    ):
         output_time = check_basic_result  # datetime.time object
-    if output_date and output_time:
-        return datetime.datetime.combine(output_date, output_time)
-    elif output_time:
-        return datetime.datetime.combine(current_date, output_time)
-    elif output_date:
-        return output_date
+    if output_date is not None:
+        if output_time is not None:
+            return datetime.datetime.combine(output_date, output_time)
+        else:
+            return output_date
+    elif output_time is not None:
+        return output_time
     else:
-        return datetime.time(1, 0)  # default
+        return "The entered Format is not supported"  # default
 
 
 # function that checks for <from <datetime1> to <datetime2>> and returns
@@ -451,7 +453,10 @@ if __name__ == "__main__":
     print(parse_time("a quarter to three"))
     print(parse_time("three weeks ago"))
     print(parse_time("ten minutes ago"))
-    print(parse_time("in twenty minutes time"))
+    print(parse_time("in three minute time"))
     print(parse_time("next Wednesday"))
     print(parse_time("last Friday"))
     print(parse_time("tomorrow at half three"))
+    print(parse_time("Ramadan"))
+    print(parse_time("Easter"))
+    print(parse_time("Hebrew New Year"))
