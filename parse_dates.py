@@ -231,6 +231,7 @@ def check_basic_time(description):
         )
         return datetime.time(hour, minutes)
 
+
 def check_next(description):
     re_next = r"\bnext\s+(\w+)\b"
     if match_object := re.search(re_next, description):
@@ -247,6 +248,7 @@ def check_last(description):
         days_since_last = (current_weekday - DAYS.index(last_day)) % 7
         return current_date - datetime.timedelta(days=days_since_last)
     return False
+
 
 def check_easter(description):
     re_easter = r"(\bnext\s)?easter"
@@ -277,10 +279,11 @@ def check_hebrew_new_year(description):
     hebrew_new_year_date = None  # Provide a default value
 
     if matched := re.search(re_hebrew_new_year, description):
-         t_j = jewish.JewishDate.from_date(current_date)
-         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1).to_date()
+        t_j = jewish.JewishDate.from_date(current_date)
+        hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1).to_date()
 
     return hebrew_new_year_date
+
 
 # function that returns datetime.datetime from a description of a
 # fixed datetime. Maybe useful?
@@ -375,44 +378,10 @@ def parse_time(description):
     description = check_oclock(description)
     if check_from_to_result := check_from_to(description):
         return check_from_to_result
-    if check_for_result := check_for(description):
+    elif check_for_result := check_for(description):
         return check_for_result
-    
-    output_date = None
-    output_time = None
+    return parse_point_time(description)
 
-    if check_hebrew_new_year_result := check_hebrew_new_year(description):
-        output_date = check_hebrew_new_year_result
-    elif check_ramadan_result := check_ramadan(description):
-        output_date = check_ramadan_result
-    elif check_easter_result := check_easter(description):
-        output_date = check_easter_result
-    elif check_ago_result := check_ago(description, current_time):
-        output_time = check_ago_result.time()
-    elif check_tomorrow_result := check_tomorrow(description):
-        output_date = check_tomorrow_result
-    elif check_in_future_result := check_in_future(description, current_time):
-        output_date = check_in_future_result
-    elif check_to_result := check_to(description):
-        output_time = check_to_result
-    elif check_past_result := check_past(description):
-        output_time = check_past_result
-    elif check_basic_result := check_basic_time(description):
-        output_time = check_basic_result
-    elif check_next_result := check_next(description):
-        output_date = check_next_result
-    elif check_last_result := check_last(description):
-        output_date = check_last_result
-
-    if output_date is not None:
-        if output_time is not None:
-            return datetime.datetime.combine(output_date, output_time)
-        else:
-            return output_date
-    elif output_time is not None:
-        return datetime.datetime.combine(current_date, output_time)
-    else:
-        return datetime.datetime.combine(current_date, datetime.time(1, 0))
 
 if __name__ == "__main__":
     current_date = datetime.datetime.now().date()
@@ -429,5 +398,3 @@ if __name__ == "__main__":
     print(parse_time("next Wednesday"))
     print(parse_time("last Friday"))
     print(parse_time("tomorrow at half three"))
-
-
