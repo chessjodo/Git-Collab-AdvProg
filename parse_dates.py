@@ -435,3 +435,4 @@ if __name__ == "__main__":
     print(parse_time("Ramadan"))
     print(parse_time("Easter"))
     print(parse_time("Hebrew New Year"))
+  
