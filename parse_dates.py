@@ -233,13 +233,8 @@ def parse_fixed_time(description):
 def parse_point_time(description):
     output_date = None
     output_time = None
-    description = description.lower()
     dimension_case = "t"
 
-    # convert fractions to minutes
-    description = convert_fractions(description)
-    # remove o'clock
-    description = check_oclock(description)
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
     if check_ago_result := check_ago(description, current_time):
@@ -315,6 +310,12 @@ def parse_time(description):
     description = convert_fractions(description)
     # remove o'clock
     description = check_oclock(description)
+    if check_from_to_result := check_from_to(description):
+        return check_from_to_result
+    if check_for_result := check_for(description):
+        return check_for_result
+
+    #   return parse_point_time(description)   instead of the block below?
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
     if check_ago_result := check_ago(description, current_time):
