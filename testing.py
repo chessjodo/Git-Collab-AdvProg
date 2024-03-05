@@ -77,7 +77,9 @@ class TestParseTime(unittest.TestCase):
     def test_in_future(self):
         long_date = datetime.datetime.now() + datetime.timedelta(hours=2)
         self.assertAlmostEqual(
-            parse_time("in two hours"),
+            datetime.datetime.combine(
+                datetime.datetime.now().date(), parse_time("in two hours")
+            ),
             long_date,
             delta=datetime.timedelta(seconds=1),
         )
