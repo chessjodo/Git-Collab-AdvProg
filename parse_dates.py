@@ -261,7 +261,7 @@ def check_hebrew_new_year(description):
     if matched := re.search(re_hebrew_new_year, description):
          t_j = jewish.JewishDate.from_date(current_date)
          hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1)
-        return hebrew_new_year_date.to_date()
+    return hebrew_new_year_date.to_date()
 
 
 # function that returns datetime.datetime from a description of a
