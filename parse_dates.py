@@ -338,9 +338,10 @@ def parse_point_time(description):
     ):
         output_date, output_time = check_ago_result  # datetime.datetime object
     elif check_tomorrow_result := check_tomorrow(description):
-        output_date = current_date + datetime.timedelta(
+        check_tomorrow_result = current_date + datetime.timedelta(
             days=1
-        )  # Next day's date
+        ) 
+        output_date = check_tomorrow_result
     elif check_in_future_result := check_in_future(description, current_time):
         output_date = check_in_future_result
     elif check_to_result := check_to(description):
