@@ -209,9 +209,9 @@ def check_in_future(description, current_time):
                 )
 
                 if unit.lower() in ["second", "minute", "hour"]:
-                    return future_datetime
+                    return future_datetime.strftime("%Y-%m-%d %H:%M:%S")
                 else:
-                    return future_datetime.date()
+                    return future_datetime.strftime("%Y-%m-%d")
 
         return False
 
@@ -316,7 +316,6 @@ def check_hebrew_new_year(description):
     return False
 
 
-
 # function that returns datetime.datetime from a description of a
 # fixed datetime. Maybe useful?
 def parse_fixed_time(description):
@@ -341,9 +340,7 @@ def parse_point_time(description):
     ):
         output_date, output_time = check_ago_result  # datetime.datetime object
     elif check_tomorrow_result := check_tomorrow(description):
-        check_tomorrow_result = current_date + datetime.timedelta(
-            days=1
-        ) 
+        check_tomorrow_result = current_date + datetime.timedelta(days=1)
         output_date = check_tomorrow_result
     elif check_in_future_result := check_in_future(description, current_time):
         output_date = check_in_future_result
