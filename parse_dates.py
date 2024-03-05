@@ -128,22 +128,39 @@ def parse_interval(string):
             raise ValueError("Invalid string format")
     return datetime.timedelta(**pars)
 
-
 def word_to_number(word):
     try:
+        # Check if the word is a number in DIGITS
         return DIGITS.index(word) + 1
     except ValueError:
-        return None
+        # Check if the word is a number in TENS
+        try:
+            return TENS.index(word) * 10
+        except ValueError:
+            return None
 
-
-def check_ago(description, current_time):
-    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\b"
+def check_ago(description, current_date=current_date, current_time=current_time):
+    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+(second|minute|hour|day|week|month|year)s?\s+ago\b"
 
     if match_object := re.search(re_ago, description):
-        sub_string = description[match_object.start() : match_object.end()]
-        minutes = word_to_number(sub_string.split()[0])
+        quantity_word, unit = match_object.group(0), match_object.group(1)
+        quantity = word_to_number(quantity_word)
 
-        return current_date - datetime.timedelta(minutes=minutes)
+        if quantity is not None:
+            delta = {
+                "second": datetime.timedelta(seconds=quantity),
+                "minute": datetime.timedelta(minutes=quantity),
+                "hour": datetime.timedelta(hours=quantity),
+                "day": datetime.timedelta(days=quantity),
+                "week": datetime.timedelta(weeks=quantity),
+                "month": datetime.timedelta(days=30 * quantity),
+                "year": datetime.timedelta(days=365 * quantity),
+            }.get(unit.lower(), None)
+
+            if delta:
+                past_datetime = datetime.datetime.combine(current_date, current_time) - delta
+
+                return past_datetime
 
     return False
 
@@ -181,12 +198,13 @@ def check_in_future(description, current_time):
                     datetime.datetime.combine(current_date, current_time)
                     + delta
                 )
-                if unit.lower() in ["second", "minute", "hour"]:
-                    return future_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                else:
-                    return future_datetime.strftime("%Y-%m-%d")
 
-    return False
+                if unit.lower() in ["second", "minute", "hour"]:
+                    return future_datetime
+                else:
+                    return future_datetime.date()
+
+        return False
 
 
 # function that converts occurences of fractions
@@ -304,8 +322,8 @@ def parse_point_time(description):
         output_date = check_ramadan_result
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
-    if check_ago_result := check_ago(description, current_time):
-        output_time = check_ago_result  # datetime.datetime object
+    elif check_ago_result := check_ago(description, current_date, current_time):
+p        output_time = check_ago_result  # datetime.datetime object
     elif check_tomorrow_result := check_tomorrow(description):
         output_date = current_date + datetime.timedelta(
             days=1
@@ -382,7 +400,6 @@ def parse_time(description):
         return check_for_result
     return parse_point_time(description)
 
-
 if __name__ == "__main__":
     current_date = datetime.datetime.now().date()
     current_time = datetime.datetime.now().time()
@@ -394,7 +411,7 @@ if __name__ == "__main__":
     print(parse_time("a quarter to three"))
     print(parse_time("three weeks ago"))
     print(parse_time("ten minutes ago"))
-    print(parse_time("in twennty minutes time"))
+    print(parse_time("in twenty minutes time"))
     print(parse_time("next Wednesday"))
     print(parse_time("last Friday"))
     print(parse_time("tomorrow at half three"))
