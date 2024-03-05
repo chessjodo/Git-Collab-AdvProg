@@ -42,6 +42,7 @@ class TestParseTime(unittest.TestCase):
             datetime.datetime.now() - datetime.timedelta(days=21),
             delta=datetime.timedelta(seconds=1),
         )
+        
 
     def test_in(self):
         long_date = datetime.datetime.now() + datetime.timedelta(minutes=20)
@@ -78,6 +79,14 @@ class TestParseTime(unittest.TestCase):
             ),
         )
 
+    def test_in_future(self):
+        long_date = datetime.datetime.now() + datetime.timedelta(hours=3)
+        future_datetime = long_date + datetime.timedelta(hours=2)
+        self.assertEqual(
+            parse_time("in two hours"),
+            future_datetime,
+        )
+    
     def test_easter(self):
         equinox = ephem.localtime(ephem.next_equinox(ephem.now()))
         full_moon = ephem.localtime(
@@ -97,7 +106,7 @@ class TestParseTime(unittest.TestCase):
         self.assertEqual(parse_time("start of ramadan"), ramadan_date)
 
     def test_hebrew_new_year(self):
-        t_j = jewish.JewishDate.from_date(current_date)
+        t_j = jewish.JewishDate.from_date(self.current_date)
         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1)
         self.assertEqual(
             parse_time("hebrew new year"), hebrew_new_year_date.to_date()
