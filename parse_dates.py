@@ -127,28 +127,54 @@ def parse_interval(string):
             raise ValueError("Invalid string format")
     return datetime.timedelta(**pars)
 
+def word_to_number(word):
+    try:
+        return DIGITS.index(word) + 1
+    except ValueError:
+        return None
+    
 
 def check_ago(description, current_time):
-    re_ago = (
-        rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
-    )
-
+    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
+    
     if match_object := re.search(re_ago, description):
-        sub_string = description[match_object.start() : match_object.end()]
+        sub_string = description[match_object.start(): match_object.end()]
         split_string = sub_string.split(" ago")
-        minutes = DIGITS.index(split_string[0]) + 1
+        minutes = word_to_number(split_string[0])
         hours = HOURS.index(split_string[1].strip()) + 1
         return datetime.datetime.combine(
-            current_date, datetime.time(f"{hours:02d}", f"{minutes:02d}")
+            current_date, 
+            datetime.time(f"{hours:02d}", f"{minutes:02d}")
         )
     return False
 
-
 def check_tomorrow(description):
     re_tomorrow = rf"\b(?:{'|'.join(DAYS)})\s+tomorrow\b"
-
+    
     if match_object := re.search(re_tomorrow, description):
-        return current_date + datetime.timedelta(days=1)
+        return True
+    return False
+
+def check_in_future(description, current_time):
+    re_in_future = r"\bin\s+(\w+)\s+(minute|hour|day|week|month|year)s?\b"
+    
+    if match_object := re.search(re_in_future, description):
+        quantity_word, unit = match_object.groups()
+        quantity = word_to_number(quantity_word)
+        
+        if quantity is not None:
+            delta = {
+                'minute': datetime.timedelta(minutes=quantity),
+                'hour': datetime.timedelta(hours=quantity),
+                'day': datetime.timedelta(days=quantity),
+                'week': datetime.timedelta(weeks=quantity),
+                'month': datetime.timedelta(days=30 * quantity),
+                'year': datetime.timedelta(days=365 * quantity),
+            }.get(unit.lower(), None)
+
+            if delta:
+                return current_date + delta
+    
     return False
 
 
@@ -240,7 +266,9 @@ def parse_point_time(description):
     if check_ago_result := check_ago(description, current_time):
         output_time = check_ago_result  # datetime.datetime object
     elif check_tomorrow_result := check_tomorrow(description):
-        output_date = current_date + datetime.timedelta(days=1)
+        output_date = current_date + datetime.timedelta(days=1)  # Next day's date
+    elif check_in_future_result := check_in_future(description, current_time):
+        output_date = check_in_future_result
     if check_to_result := check_to(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
