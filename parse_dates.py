@@ -249,7 +249,7 @@ def check_oclock(description):
 
 def check_basic_time(description):
     re_basic = r"\b({})\s*({})?".format("|".join(HOURS), "|".join(MINUTES))
-    if matched := re.match(re_basic, description):
+    if matched := re.search(re_basic, description):
         hour = HOURS.index(matched.group(1)) + 1
         minutes = (
             MINUTES.index(matched.group(2)) + 1 if matched.group(2) else 0
@@ -349,7 +349,9 @@ def parse_point_time(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
         output_time = check_past_result  # datetime.time object
-    elif check_basic_result := check_basic_time(description):
+    if (output_time == None) and (
+        check_basic_result := check_basic_time(description)
+    ):
         output_time = check_basic_result  # datetime.time object
     if output_date is not None:
         if output_time is not None:
@@ -435,4 +437,3 @@ if __name__ == "__main__":
     print(parse_time("Ramadan"))
     print(parse_time("Easter"))
     print(parse_time("Hebrew New Year"))
-  
