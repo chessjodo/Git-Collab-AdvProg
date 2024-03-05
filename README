@@ -71,3 +71,6 @@ https://rhodesmill.org/pyephem/quick.html
 
 Defining the start date of Ramadan as one day after the new moon
 https://en.wikipedia.org/wiki/Ramadan#Important_dates
+
+Documentation on the jewish library (allows for easy calendar conversions and calculations)
+https://github.com/emosenkis/jewish/blob/master/setup.py
