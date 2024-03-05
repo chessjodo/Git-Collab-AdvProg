@@ -38,13 +38,14 @@ HOURS = DIGITS + [
     "twentyfour",
 ]
 
-DAYS = ["monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday"
+DAYS = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
 ]
 TENS = ["twenty", "thirty", "fourty", "fifty"]
 
@@ -99,27 +100,30 @@ def check_past(description):
         return datetime.time(hours, minutes)
     return False
 
+
 def check_ago(description, current_time):
-    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
-    
+    re_ago = (
+        rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
+    )
+
     if match_object := re.search(re_ago, description):
-        sub_string = description[match_object.start(): match_object.end()]
+        sub_string = description[match_object.start() : match_object.end()]
         split_string = sub_string.split(" ago")
         minutes = DIGITS.index(split_string[0]) + 1
         hours = HOURS.index(split_string[1].strip()) + 1
         return datetime.datetime.combine(
-            current_date, 
-            datetime.time(f"{hours:02d}", f"{minutes:02d}")
+            current_date, datetime.time(f"{hours:02d}", f"{minutes:02d}")
         )
     return False
 
+
 def check_tomorrow(description):
     re_tomorrow = rf"\b(?:{'|'.join(DAYS)})\s+tomorrow\b"
-    
+
     if match_object := re.search(re_tomorrow, description):
         return current_date + datetime.timedelta(days=1)
     return False
-    
+
 
 # function that converts occurences of fractions
 def convert_fractions(description):
@@ -163,6 +167,7 @@ def check_basic_time(description):
         )
         return datetime.time(hour, minutes)
 
+
 def check_easter(description):
     re_easter = r"(\bnext\s)?easter"
     if matched := re.search(re_easter, description):
@@ -175,30 +180,35 @@ def check_easter(description):
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
         return easter_date.date()
 
+
 # function that returns datetime.datetime from a description of a
 # fixed datetime. Maybe useful?
 def parse_fixed_time(description):
+    pass
+
 
 # function that returns datetime.datetime of a description of a
 # single datetime point (it can be fixed or relative)
 def parse_point_time(description):
+    pass
+
 
 # function that checks for <from <datetime1> to <datetime2>> and returns
 # a tuple of (datetime.datetime,datetime.datetime)
 def check_from_to(des):
     re_from = r"\bfrom\s+"
     re_to = r"\bto\s+"
-    if not(match_from:=re.search(re_from,des)):
+    if not (match_from := re.search(re_from, des)):
         return False
-    match_to=re.search(re_to,des)
+    match_to = re.search(re_to, des)
 
-    des_left=des[match_from.end():match_to.start()]
-    dt_left=parse_point_time(des_left)
+    des_left = des[match_from.end() : match_to.start()]
+    dt_left = parse_point_time(des_left)
 
-    des_right=des[match_to.end():]
-    dt_right=parse_point_time(des_right)
+    des_right = des[match_to.end() :]
+    dt_right = parse_point_time(des_right)
 
-    return (dt_left,dt_right)
+    return (dt_left, dt_right)
 
 
 # main checker function
@@ -235,9 +245,8 @@ def parse_time(description):
 
 
 if __name__ == "__main__":
-    
-   current_date = datetime.datetime.now().date()
-   current_time = datetime.datetime.now().time()
-   current_weekday = datetime.datetime.now().weekday()
-   
-   print(parse_time("tomorrow"))
+    current_date = datetime.datetime.now().date()
+    current_time = datetime.datetime.now().time()
+    current_weekday = datetime.datetime.now().weekday()
+
+    print(parse_time("tomorrow"))
