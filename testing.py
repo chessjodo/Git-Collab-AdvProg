@@ -101,7 +101,7 @@ class TestParseTime(unittest.TestCase):
         self.assertEqual(parse_time("start of ramadan"), ramadan_date)
 
     def test_hebrew_new_year(self):
-        t_j = jewish.JewishDate.from_date(self.current_date)
+        t_j = jewish.JewishDate.from_date(datetime.datetime.now())
         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1)
         self.assertEqual(
             parse_time("hebrew new year"), hebrew_new_year_date.to_date()
