@@ -156,7 +156,9 @@ def check_tomorrow(description):
 
 
 def check_in_future(description, current_time):
-    re_in_future = r"\bin\s+(\w+)\s+(minute|hour|day|week|month|year)s?\b"
+    re_in_future = (
+        r"\bin\s+(\w+)\s+(second|minute|hour|day|week|month|year)s?\b"
+    )
 
     if match_object := re.search(re_in_future, description):
         quantity_word, unit = match_object.groups()
@@ -164,6 +166,7 @@ def check_in_future(description, current_time):
 
         if quantity is not None:
             delta = {
+                "second": datetime.timedelta(seconds=quantity),
                 "minute": datetime.timedelta(minutes=quantity),
                 "hour": datetime.timedelta(hours=quantity),
                 "day": datetime.timedelta(days=quantity),
@@ -173,7 +176,14 @@ def check_in_future(description, current_time):
             }.get(unit.lower(), None)
 
             if delta:
-                return current_date + delta
+                future_datetime = (
+                    datetime.datetime.combine(current_date, current_time)
+                    + delta
+                )
+                if unit.lower() in ["second", "minute", "hour"]:
+                    return future_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    return future_datetime.strftime("%Y-%m-%d")
 
     return False
 
