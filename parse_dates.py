@@ -123,10 +123,13 @@ def parse_interval(string):
         else:
             raise ValueError("Invalid string format")
         if s[i + 1] in ["minutes", "hours", "days", "weeks"]:
-            pars[s[i + 1]] = n
+            pars[s[i + 1]] += n
+        elif s[i + 1] == "months":
+            pars["days"] = 30 * n
         else:
             raise ValueError("Invalid string format")
     return datetime.timedelta(**pars)
+
 
 def word_to_number(word):
     try:
@@ -139,7 +142,10 @@ def word_to_number(word):
         except ValueError:
             return None
 
-def check_ago(description, current_date=current_date, current_time=current_time):
+
+def check_ago(
+    description, current_date=current_date, current_time=current_time
+):
     re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+(second|minute|hour|day|week|month|year)s?\s+ago\b"
 
     if match_object := re.search(re_ago, description):
@@ -158,7 +164,10 @@ def check_ago(description, current_date=current_date, current_time=current_time)
             }.get(unit.lower(), None)
 
             if delta:
-                past_datetime = datetime.datetime.combine(current_date, current_time) - delta
+                past_datetime = (
+                    datetime.datetime.combine(current_date, current_time)
+                    - delta
+                )
 
                 return past_datetime
 
@@ -311,7 +320,7 @@ def parse_fixed_time(description):
 
 # function that returns datetime.datetime or datetime.date from a description
 # of a single datetime point (it can be fixed or relative)
-def parse_point_time(description):
+def parse_point_time(description, current_time=current_time):
     output_date = None
     output_time = None
     dimension_case = "t"
@@ -322,8 +331,10 @@ def parse_point_time(description):
         output_date = check_ramadan_result
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
-    elif check_ago_result := check_ago(description, current_date, current_time):
-p        output_time = check_ago_result  # datetime.datetime object
+    elif check_ago_result := check_ago(
+        description, current_date, current_time
+    ):
+        output_time = check_ago_result  # datetime.datetime object
     elif check_tomorrow_result := check_tomorrow(description):
         output_date = current_date + datetime.timedelta(
             days=1
@@ -388,6 +399,34 @@ def check_for(des):
     return (time_start, time_start + interval)
 
 
+def check_every(des):
+    re_every = r"\bevery\s+"
+    if not (match_every := re.search(re_every, des)):
+        return False
+    des_right = des[match_every.end() :]
+    re_days = rf"({'|'.join(DAYS)})\s+"
+    re_intervals = r"\b(minute|hour|day|week|month|year)s?"
+    if match_days := re.match(re_days, des_right):
+        des_point = "next " + des_right
+        start_time = parse_point_time(des_point)
+        delta = (
+            parse_point_time(
+                des_point, start_time + datetime.timedelta(days=1)
+            )
+            - start_time
+        )
+    elif match_interval := re.search(re_interval, des_right):
+        if des_right[match_interval.end() - 1] != "s":
+            article = "a "
+        else:
+            article = ""
+        delta = parse_interval(article + des_right[: match_interval.end()])
+        start_time = parse_point_time(
+            des[: match_every.start()] + des[match_interval.end() :]
+        )
+    return (start_time, delta)
+
+
 # main checker function
 def parse_time(description):
     description = description.lower()
@@ -399,6 +438,7 @@ def parse_time(description):
     elif check_for_result := check_for(description):
         return check_for_result
     return parse_point_time(description)
+
 
 if __name__ == "__main__":
     current_date = datetime.datetime.now().date()
