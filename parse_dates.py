@@ -123,7 +123,7 @@ def parse_interval(string):
         else:
             raise ValueError("Invalid string format")
         if s[i + 1] in ["minutes", "hours", "days", "weeks"]:
-            pars[s[i + 1]] += n
+            pars[s[i + 1]] = n
         elif s[i + 1] == "months":
             pars["days"] = 30 * n
         else:
@@ -407,16 +407,11 @@ def check_every(des):
         return False
     des_right = des[match_every.end() :]
     re_days = rf"({'|'.join(DAYS)})\s+"
-    re_intervals = r"\b(minute|hour|day|week|month|year)s?"
+    re_interval = r"\b(minute|hour|day|week|month|year)s?"
     if match_days := re.match(re_days, des_right):
         des_point = "next " + des_right
         start_time = parse_point_time(des_point)
-        delta = (
-            parse_point_time(
-                des_point, start_time + datetime.timedelta(days=1)
-            )
-            - start_time
-        )
+        delta = datetime.timedelta(days=7)
     elif match_interval := re.search(re_interval, des_right):
         if des_right[match_interval.end() - 1] != "s":
             article = "a "
@@ -439,6 +434,8 @@ def parse_time(description):
         return check_from_to_result
     elif check_for_result := check_for(description):
         return check_for_result
+    if check_every_result := check_every(description):
+        return check_every_result
     return parse_point_time(description)
 
 
@@ -460,3 +457,8 @@ if __name__ == "__main__":
     print(parse_time("Ramadan"))
     print(parse_time("Easter"))
     print(parse_time("Hebrew New Year"))
+    print(parse_time("last Tuesday from three to a quarter to five"))
+    print(parse_time("in two weeks for three days two hours"))
+    print(parse_time("every Monday at twelve oclock"))
+    print(parse_time("every hour tomorrow"))
+    print(parse_time("tomorrow every hour"))
