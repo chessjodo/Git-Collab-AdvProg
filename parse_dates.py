@@ -175,7 +175,7 @@ def check_ago(
 
 
 def check_tomorrow(description):
-    re_tomorrow = rf"\b(?:{'|'.join(DAYS)})\s+tomorrow\b"
+    re_tomorrow = rf"\b(?:{'|'.join(DAYS)})?\s?+tomorrow\b"
 
     if match_object := re.search(re_tomorrow, description):
         return current_date + datetime.timedelta(days=1)
@@ -333,24 +333,22 @@ def parse_point_time(description):
         output_date = check_ramadan_result
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
-    elif check_ago_result := check_ago(
-        description, current_date, current_time
-    ):
-        output_date, output_time = check_ago_result  # datetime.datetime object
     elif check_tomorrow_result := check_tomorrow(description):
         output_date = current_date + datetime.timedelta(
             days=1
         )  # Next day's date
     elif check_in_future_result := check_in_future(description, current_time):
         output_date = check_in_future_result
+    elif check_last_result := check_last(description):
+        output_date = check_last_result
+    elif check_next_result := check_next(description):
+        output_date = check_next_result
+    if check_ago_result := check_ago(description, current_date, current_time):
+        output_date, output_time = check_ago_result  # datetime.datetime object
     elif check_to_result := check_to(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
         output_time = check_past_result  # datetime.time object
-    elif check_next_result := check_next(description):
-        output_date = check_next_result
-    elif check_last_result := check_last(description):
-        output_date = check_last_result
     elif check_basic_result := check_basic_time(description):
         output_time = check_basic_result  # datetime.time object
     if output_date is not None:
