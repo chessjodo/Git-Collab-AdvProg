@@ -290,6 +290,7 @@ def check_easter(description):
         diff_to_sunday = 6 - weekday_fullmoon
         easter_date = full_moon + datetime.timedelta(days=diff_to_sunday)
         return easter_date.date()
+    return False
 
 
 def check_ramadan(description):
@@ -301,6 +302,7 @@ def check_ramadan(description):
         new_moon_date = ephem.localtime(new_moon).date()
         ramadan_date = new_moon_date + datetime.timedelta(days=1)
         return ramadan_date
+    return False
 
 
 def check_hebrew_new_year(description):
@@ -310,8 +312,9 @@ def check_hebrew_new_year(description):
     if matched := re.search(re_hebrew_new_year, description):
         t_j = jewish.JewishDate.from_date(current_date)
         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1).to_date()
+        return hebrew_new_year_date
+    return False
 
-    return hebrew_new_year_date
 
 
 # function that returns datetime.datetime from a description of a
@@ -334,9 +337,10 @@ def parse_point_time(description):
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
     elif check_tomorrow_result := check_tomorrow(description):
-        output_date = current_date + datetime.timedelta(
+        check_tomorrow_result = current_date + datetime.timedelta(
             days=1
-        )  # Next day's date
+        ) 
+        output_date = check_tomorrow_result
     elif check_in_future_result := check_in_future(description, current_time):
         output_date = check_in_future_result
     elif check_last_result := check_last(description):
