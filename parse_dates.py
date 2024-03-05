@@ -436,3 +436,6 @@ if __name__ == "__main__":
     print(parse_time("next Wednesday"))
     print(parse_time("last Friday"))
     print(parse_time("tomorrow at half three"))
+    print(parse_time("Ramadan"))
+    print(parse_time("Easter"))
+    print(parse_time("Hebrew New Year"))
