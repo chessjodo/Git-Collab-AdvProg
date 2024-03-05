@@ -127,25 +127,22 @@ def parse_interval(string):
             raise ValueError("Invalid string format")
     return datetime.timedelta(**pars)
 
+
 def word_to_number(word):
     try:
         return DIGITS.index(word) + 1
     except ValueError:
         return None
-    
 
 def check_ago(description, current_time):
-    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\s+\b(?:{'|'.join(HOURS)})"
+    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+ago\b"
     
     if match_object := re.search(re_ago, description):
         sub_string = description[match_object.start(): match_object.end()]
-        split_string = sub_string.split(" ago")
-        minutes = word_to_number(split_string[0])
-        hours = HOURS.index(split_string[1].strip()) + 1
-        return datetime.datetime.combine(
-            current_date, 
-            datetime.time(f"{hours:02d}", f"{minutes:02d}")
-        )
+        minutes = word_to_number(sub_string.split()[0])
+
+        return current_date - datetime.timedelta(minutes=minutes)
+    
     return False
 
 def check_tomorrow(description):
@@ -347,9 +344,11 @@ def parse_time(description):
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
     if check_ago_result := check_ago(description, current_time):
-        output_time = check_ago_result  # datetime.datetime object
+        output_time = datetime.datetime.combine(check_ago_result, datetime.time(1, 0))
     elif check_tomorrow_result := check_tomorrow(description):
-        output_date = current_date + datetime.timedelta(days=1)
+        output_date = current_date + datetime.timedelta(days=1)  # Next day's date
+    elif check_in_future_result := check_in_future(description, current_time):
+        output_date = check_in_future_result
     if check_to_result := check_to(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
@@ -357,11 +356,11 @@ def parse_time(description):
     elif check_basic_result := check_basic_time(description):
         output_time = check_basic_result  # datetime.time object
     if output_date and output_time:
-        return datetime.datetime.combine(output_date, output_time)
+        return datetime.datetime.combine(output_date, output_time.time())
     elif output_date:
         return output_date
     elif output_time:
-        return output_time.date()  # Return only the date part
+        return datetime.datetime.combine(current_date, output_time)  # Combine with current date
     else:
         return datetime.time(1, 0)  # default
 
@@ -370,5 +369,8 @@ if __name__ == "__main__":
     current_date = datetime.datetime.now().date()
     current_time = datetime.datetime.now().time()
     current_weekday = datetime.datetime.now().weekday()
-
-    print(parse_time("tomorrow"))
+   
+    print(parse_time("ten minutes ago"))
+    print(parse_time("in twenty minutes"))
+    print(parse_time("in one hour"))
+    print(parse_time("in two days"))
