@@ -359,7 +359,7 @@ def parse_point_time(description):
         else:
             return output_date
     elif output_time is not None:
-        return datetime.datetime.combine(current_date, output_time)
+        return output_time
     else:
         return "The entered Format is not supported"  # default
 

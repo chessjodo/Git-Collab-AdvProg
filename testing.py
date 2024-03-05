@@ -54,18 +54,14 @@ class TestParseTime(unittest.TestCase):
     def test_next(self):
         day_of_the_week = datetime.datetime.now().weekday()
         difference = (1 - day_of_the_week) % 7
-        self.assertEqual(
-            parse_time("next Tuesday"),
-            datetime.datetime.now() + datetime.timedelta(days=difference),
-        )
+        result = datetime.datetime.now() + datetime.timedelta(days=difference)
+        self.assertEqual(parse_time("next Tuesday"), result.date())
 
     def test_last(self):
         day_of_the_week = datetime.datetime.now().weekday()
         difference = (4 - day_of_the_week) % 7 - 7
-        self.assertEqual(
-            parse_time("last Friday"),
-            datetime.datetime.now() + datetime.timedelta(days=difference),
-        )
+        result = datetime.datetime.now() + datetime.timedelta(days=difference)
+        self.assertEqual(parse_time("last Friday"), result.date())
 
     def test_tomorrow(self):
         new_datetime = datetime.datetime.now() + datetime.timedelta(days=1)
