@@ -45,10 +45,10 @@ class TestParseTime(unittest.TestCase):
 
     def test_in(self):
         long_date = datetime.datetime.now() + datetime.timedelta(minutes=20)
-        time_20_minutes = long_date.time()
-        self.assertEqual(
+        self.assertAlmostEqual(
             parse_time("in twenty minutes' time"),
-            time_20_minutes,
+            long_date,
+            delta=datetime.timedelta(seconds=1),
         )
 
     def test_next(self):
@@ -77,9 +77,7 @@ class TestParseTime(unittest.TestCase):
     def test_in_future(self):
         long_date = datetime.datetime.now() + datetime.timedelta(hours=2)
         self.assertAlmostEqual(
-            datetime.datetime.combine(
-                datetime.datetime.now().date(), parse_time("in two hours")
-            ),
+            parse_time("in two hours"),
             long_date,
             delta=datetime.timedelta(seconds=1),
         )

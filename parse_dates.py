@@ -183,11 +183,12 @@ def check_tomorrow(description):
 
 
 def check_in_future(description, current_time):
-    re_in_future = r"\bin\s+(\w+)\s+(second|minute|hour|day|week|month|year|minutes)'?\s*(?:time)?\b"
+    re_in_future = r"\bin\s+(\w+)\s+(second|minute|hour|day|week|month|year)s?'?\s*(?:time)?\b"
 
     if match_object := re.search(re_in_future, description):
         quantity_word, unit = match_object.group(1), match_object.group(2)
         quantity = word_to_number(quantity_word)
+
         if quantity is not None:
             delta = {
                 "second": datetime.timedelta(seconds=quantity),
@@ -308,12 +309,6 @@ def check_hebrew_new_year(description):
         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1).to_date()
         return hebrew_new_year_date
     return False
-
-
-# function that returns datetime.datetime from a description of a
-# fixed datetime. Maybe useful?
-def parse_fixed_time(description):
-    pass
 
 
 # function that returns datetime.datetime or datetime.date from a description
