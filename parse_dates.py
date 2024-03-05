@@ -258,8 +258,9 @@ def check_ramadan(description):
 def check_hebrew_new_year(description):
     re_hebrew_new_year = r"\b(?:hebrew\s+new\s+year|rosh\s+hashanah)\b"
     if matched := re.search(re_hebrew_new_year, description):
-        hebrew_new_year_date = datetime.date(1, 1, 1)  # placeholder again
-        return hebrew_new_year_date
+         t_j = jewish.JewishDate.from_date(current_date)
+         hebrew_new_year_date = jewish.JewishDate(t_j.year + 1, 1, 1)
+        return hebrew_new_year_date.to_date()
 
 
 # function that returns datetime.datetime from a description of a
@@ -275,6 +276,8 @@ def parse_point_time(description):
     output_time = None
     dimension_case = "t"
 
+    if check_hebrew_new_year_result := check_hebrew_new_year(description):
+        output_date = check_hebrew_new_year_result
     if check_ramadan_result := check_ramadan(description):
         output_date = check_ramadan_result
     if check_easter_result := check_easter(description):
@@ -362,6 +365,8 @@ def parse_time(description):
         return check_for_result
 
     #   return parse_point_time(description)   instead of the block below?
+    if check_hebrew_new_year_result := check_hebrew_new_year(description):
+        output_date = check_hebrew_new_year_result
     if check_ramadan_result := check_ramadan(description):
         output_date = check_ramadan_result
     if check_easter_result := check_easter(description):
