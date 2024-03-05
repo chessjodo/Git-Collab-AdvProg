@@ -128,6 +128,7 @@ def parse_interval(string):
             raise ValueError("Invalid string format")
     return datetime.timedelta(**pars)
 
+
 def word_to_number(word):
     try:
         # Check if the word is a number in DIGITS
@@ -137,15 +138,30 @@ def word_to_number(word):
         try:
             return TENS.index(word) * 10
         except ValueError:
-            return None
+            try:
+                return MINUTES.index(word) + 1
+            except ValueError:
+                return None
 
-def check_ago(description, current_date=current_date, current_time=current_time):
-    re_ago = rf"\b(?:{'|'.join(DIGITS + TENS)})\s+(second|minute|hour|day|week|month|year)s?\s+ago\b"
+
+def check_ago(
+    description, current_date=current_date, current_time=current_time
+):
+    print("AGO FUNCTION: ", description)
+    re_ago = rf"\b({'|'.join(MINUTES)})\s+(second|minute|hour|day|week|month|year)s?\s+ago\b"
 
     if match_object := re.search(re_ago, description):
-        quantity_word, unit = match_object.group(0), match_object.group(1)
+        print("MATCHED AGO")
+        quantity_word, unit = match_object.group(1), match_object.group(2)
         quantity = word_to_number(quantity_word)
-
+        print(
+            "quantity word: ",
+            quantity_word,
+            "Unit: ",
+            unit,
+            "quantity: ",
+            quantity,
+        )
         if quantity is not None:
             delta = {
                 "second": datetime.timedelta(seconds=quantity),
@@ -158,9 +174,12 @@ def check_ago(description, current_date=current_date, current_time=current_time)
             }.get(unit.lower(), None)
 
             if delta:
-                past_datetime = datetime.datetime.combine(current_date, current_time) - delta
+                past_datetime = (
+                    datetime.datetime.combine(current_date, current_time)
+                    - delta
+                )
 
-                return past_datetime
+                return past_datetime.date(), past_datetime.time()
 
     return False
 
@@ -322,15 +341,17 @@ def parse_point_time(description):
         output_date = check_ramadan_result
     if check_easter_result := check_easter(description):
         output_date = check_easter_result
-    elif check_ago_result := check_ago(description, current_date, current_time):
-p        output_time = check_ago_result  # datetime.datetime object
+    elif check_ago_result := check_ago(
+        description, current_date, current_time
+    ):
+        output_date, output_time = check_ago_result  # datetime.datetime object
     elif check_tomorrow_result := check_tomorrow(description):
         output_date = current_date + datetime.timedelta(
             days=1
         )  # Next day's date
     elif check_in_future_result := check_in_future(description, current_time):
         output_date = check_in_future_result
-    if check_to_result := check_to(description):
+    elif check_to_result := check_to(description):
         output_time = check_to_result  # datetime.time object
     elif check_past_result := check_past(description):
         output_time = check_past_result  # datetime.time object
@@ -399,6 +420,7 @@ def parse_time(description):
     elif check_for_result := check_for(description):
         return check_for_result
     return parse_point_time(description)
+
 
 if __name__ == "__main__":
     current_date = datetime.datetime.now().date()
